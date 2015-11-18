@@ -8,7 +8,19 @@
 #include <iostream>
 #include <vector>
 
+class SNMPPDU {
+private:
+		std::string name_;
+		char type_;
+		void *value_;
+};
+
 class SNMPPacket {
+public:
+		enum class DataType {
+				Integer = 0x02,
+		};
+
 private:
 		unsigned char version_;
 		std::string community_;
@@ -18,14 +30,7 @@ private:
 		unsigned char error_index_;
 		unsigned char non_repeaters_;
 		unsigned char max_repetitions_;
-		std::vector<SNMPPDU> variables_;
-};
-
-class SNMPPDU {
-private:
-		std::string name_;
-		int type_;
-		void *value_;
+		std::vector<SNMPPDU*> variables_;
 };
 
 #endif //ISA_SNMPPACKET_H

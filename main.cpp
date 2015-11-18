@@ -1,6 +1,6 @@
 #include <iostream>
 #include <getopt.h>
-#include <unistd.h>
+#include "SNMPClient.h"
 
 using namespace std;
 
@@ -35,5 +35,8 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	return 0;
+	// create client and run it
+	SNMPClient client{agent, community_string, interval};
+
+	return client.Run();
 }
