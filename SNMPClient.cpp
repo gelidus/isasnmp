@@ -24,6 +24,8 @@ Error SNMPClient::Run() {
 		return err;
 	}
 
+	SNMPPacket ifTable{SNMPVersion, community_, SNMPProtocol::GetNextRequest };
+
 	for (;;) {
 
 	}
@@ -64,6 +66,17 @@ Error SNMPClient::ReceiveMessage(int length, char *msg) {
 	if (recvd == -1) {
 		return Error::CannotReceiveData;
 	}
+
+	return Error::None;
+}
+
+Error SNMPClient::SendPacket(SNMPPacket *packet) {
+	std::vector<Byte> bytes{};
+
+	return Error::None;
+}
+
+Error SNMPClient::ReceivePacket(SNMPPacket *packet) {
 
 	return Error::None;
 }

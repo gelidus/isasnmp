@@ -10,12 +10,14 @@ SNMPPacket::SNMPPacket(Byte version, std::string community, Byte request_id) {
 	request_id_ = request_id;
 }
 
-std::vector<unsigned char> SNMPPacket::Marshal() {
-	return std::vector<unsigned char>();
+Error SNMPPacket::Marshal(std::vector<unsigned char> &bytes) {
+
+	return Error::None;
 }
 
-void SNMPPacket::Unmarshal(std::vector<unsigned char> vector) {
+Error SNMPPacket::Unmarshal(std::vector<unsigned char> &bytes) {
 
+	return Error::None;
 }
 
 void SNMPPacket::set_error(Byte error) {

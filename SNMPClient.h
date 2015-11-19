@@ -16,22 +16,17 @@
 #include<err.h>
 #else
 #include <winsock2.h>
+#include "SNMPPacket.h"
+
 #pragma comment(lib,"ws2_32.lib")
 #endif
 
 const int SNMPVersion = 0x00;
 const int SNMPPort = 161;
 
-enum class Error {
-		None,
-		CannotCreateSocket,
-		CannotSendData,
-		CannotSendFullData,
-		CannotReceiveData,
-};
-
-enum class SNMPProtocol {
+enum SNMPProtocol : unsigned char {
 		GetNextRequest = 0xa1,
+		GetResponse = 0xa2
 };
 
 class SNMPClient {
@@ -63,6 +58,10 @@ private:
 		Error SendMessage(char *msg, int length);
 
 		Error ReceiveMessage(int length, char *msg);
+
+		Error SendPacket(SNMPPacket *packet);
+
+		Error ReceivePacket(SNMPPacket *packet);
 };
 
 

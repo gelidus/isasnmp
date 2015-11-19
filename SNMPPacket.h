@@ -8,6 +8,14 @@
 #include <iostream>
 #include <vector>
 
+enum class Error {
+		None,
+		CannotCreateSocket,
+		CannotSendData,
+		CannotSendFullData,
+		CannotReceiveData,
+};
+
 enum class DataType {
 		Integer = 0x02,
 };
@@ -25,9 +33,9 @@ class SNMPPacket {
 public:
 		SNMPPacket(Byte version, std::string community, Byte request_id);
 
-		std::vector<unsigned char> Marshal();
+		Error Marshal(std::vector<unsigned char> &bytes);
 
-		void Unmarshal(std::vector<unsigned char>);
+		Error Unmarshal(std::vector<unsigned char> &bytes);
 
 private:
 		Byte version_;
