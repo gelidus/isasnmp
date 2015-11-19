@@ -36,24 +36,26 @@ enum class SNMPProtocol {
 
 class SNMPClient {
 private:
+		// global client settings
 		std::string address_;
 		std::string community_;
 		int interval_;
 
+		// connection details
+		struct sockaddr_in server_;
 #ifdef __unix__
 		int socket_;
+		socketlen_t server_info_length;
 #else
 		SOCKET socket_;
-#endif
-
-		struct sockaddr_in server_;
 		int server_info_length_;
+#endif
 
 public:
 		SNMPClient(std::string address, std::string community, int interval);
 		virtual ~SNMPClient();
 
-		int Run();
+		Error Run();
 
 private:
 		Error SetupConnection();

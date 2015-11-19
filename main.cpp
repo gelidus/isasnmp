@@ -38,5 +38,5 @@ int main(int argc, char *argv[]) {
 	// create client and run it
 	SNMPClient client{agent, community_string, interval};
 
-	return client.Run();
+	return static_cast<int>(client.Run());
 }

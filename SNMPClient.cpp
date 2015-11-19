@@ -18,10 +18,16 @@ SNMPClient::~SNMPClient() {
 #endif
 }
 
-int SNMPClient::Run() {
-	return false;
-}
+Error SNMPClient::Run() {
+	Error err = SetupConnection();
+	if (err != Error::None) {
+		return err;
+	}
 
+	for (;;) {
+
+	}
+}
 
 Error SNMPClient::SetupConnection() {
 	// create datagram socket
