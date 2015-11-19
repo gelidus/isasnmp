@@ -19,7 +19,7 @@
 #pragma comment(lib,"ws2_32.lib")
 #endif
 
-const int SNMPVersion = 1;
+const int SNMPVersion = 0x00;
 const int SNMPPort = 161;
 
 enum class Error {

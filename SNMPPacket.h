@@ -8,6 +8,10 @@
 #include <iostream>
 #include <vector>
 
+enum class DataType {
+		Integer = 0x02,
+};
+
 class SNMPPDU {
 private:
 		std::string name_;
@@ -15,22 +19,32 @@ private:
 		void *value_;
 };
 
+typedef unsigned char Byte;
+
 class SNMPPacket {
 public:
-		enum class DataType {
-				Integer = 0x02,
-		};
+		SNMPPacket(Byte version, std::string community, Byte request_id);
+
+		std::vector<unsigned char> Marshal();
+
+		void Unmarshal(std::vector<unsigned char>);
 
 private:
-		unsigned char version_;
+		Byte version_;
 		std::string community_;
 		char request_type_;
-		unsigned char request_id_;
-		unsigned char error_;
-		unsigned char error_index_;
-		unsigned char non_repeaters_;
-		unsigned char max_repetitions_;
+		Byte request_id_;
+		Byte error_;
+		Byte error_index_;
+		Byte non_repeaters_;
+		Byte max_repetitions_;
 		std::vector<SNMPPDU*> variables_;
+public:
+		void set_error(Byte error);
+		Byte error();
+
+		void set_error_index(Byte index);
+		Byte error_index();
 };
 
 #endif //ISA_SNMPPACKET_H
