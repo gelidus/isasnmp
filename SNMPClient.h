@@ -21,8 +21,8 @@
 #pragma comment(lib,"ws2_32.lib")
 #endif
 
-const int SNMPVersion = 0x00;
-const int SNMPPort = 161;
+const int kSNMPVersion = 0x00;
+const int kSNMPPort = 161;
 
 class SNMPClient {
 private:

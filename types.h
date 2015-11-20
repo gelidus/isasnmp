@@ -18,6 +18,7 @@ enum class Error {
 enum SNMPDataType : Byte {
 		Integer = 0x02,
 		OctetString = 0x04,
+		Null = 0x05,
 		Sequence = 0x30,
 
 		GetNextRequest = 0xa1,

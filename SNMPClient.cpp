@@ -32,6 +32,31 @@ Error SNMPClient::Run() {
 		return err;
 	}
 
+	// first packet for the interface table
+	SNMPGetPacket ifTablePacket{
+			SNMPDataType::Sequence,
+			kSNMPVersion,
+			community_,
+			SNMPPDU{
+					1, // request_id
+					0, // error
+					0, // error index
+					SNMPVarbindList{
+							vector<SNMPVarbind>{
+									SNMPVarbind{ // add varbind for the object of iftable
+											SNMPObjectIdentifier{
+													std::vector<Byte>{1, 3, 6, 1, 2, 1, 2, 2}
+											},
+											SNMPValue{
+													SNMPDataType::Null,
+													nullptr
+											}
+									}
+							}
+					}
+			}
+	};
+
 	for (;;) {
 
 	}
@@ -45,7 +70,7 @@ Error SNMPClient::SetupConnection() {
 
 	server_.sin_addr.s_addr = inet_addr(this->address_.c_str());
 	server_.sin_family = AF_INET;
-	server_.sin_port = htons(SNMPPort);
+	server_.sin_port = htons(kSNMPPort);
 
 	server_info_length_ = sizeof(server_);
 

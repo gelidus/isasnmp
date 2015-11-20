@@ -79,11 +79,11 @@ public:
 // for the ObjectIdentifier block of the SNMP packet.
 class SNMPObjectIdentifier : public SNMPEntity {
 private:
-		std::string value_;
+		std::vector<Byte> value_;
 
 public:
 		SNMPObjectIdentifier();
-		SNMPObjectIdentifier(std::string value);
+		SNMPObjectIdentifier(std::vector<Byte> value);
 		virtual ~SNMPObjectIdentifier();
 
 		virtual Error Marshal(std::vector<Byte> &to) override;
@@ -100,7 +100,7 @@ public:
 
 public:
 		SNMPValue();
-		SNMPValue(SNMPEntity *value);
+		SNMPValue(SNMPDataType type, SNMPEntity *value);
 		virtual ~SNMPValue();
 
 		virtual Error Marshal(std::vector<Byte> &to) override;
@@ -132,10 +132,11 @@ public:
 // VarbindList block of the snmp packet.
 class SNMPVarbindList : public SNMPEntity {
 private:
-		std::vector<SNMPVarbind*> varbinds_;
+		std::vector<SNMPVarbind> varbinds_;
 
 public:
 		SNMPVarbindList();
+		SNMPVarbindList(std::vector<SNMPVarbind> varbinds_);
 		virtual ~SNMPVarbindList();
 
 		bool Add(SNMPVarbind *varbind);
@@ -153,10 +154,11 @@ private:
 		SNMPInteger request_id_;
 		SNMPInteger error_;
 		SNMPInteger error_index_;
+		SNMPVarbindList varbinds_;
 
 public:
 		SNMPPDU();
-		SNMPPDU(SNMPInteger request_id, SNMPInteger error, SNMPInteger error_index);
+		SNMPPDU(SNMPInteger request_id, SNMPInteger error, SNMPInteger error_index, SNMPVarbindList varbins);
 		virtual ~SNMPPDU();
 
 		virtual Error Marshal(std::vector<Byte> &to) override;
@@ -176,7 +178,7 @@ private:
 
 public:
 		SNMPGetPacket();
-		SNMPGetPacket(SNMPInteger version, SNMPOctetString community_string, SNMPPDU);
+		SNMPGetPacket(SNMPDataType type, SNMPInteger version, SNMPOctetString community_string, SNMPPDU);
 		virtual ~SNMPGetPacket();
 
 		virtual Error Marshal(std::vector<Byte> &to) override;
