@@ -42,10 +42,10 @@ Error SNMPClient::Run() {
 					0, // error
 					0, // error index
 					SNMPVarbindList{
-							vector<SNMPVarbind>{
+							list<SNMPVarbind>{
 									SNMPVarbind{ // add varbind for the object of iftable
 											SNMPObjectIdentifier{
-													std::vector<Byte>{1, 3, 6, 1, 2, 1, 2, 2}
+													list<Byte>{1, 3, 6, 1, 2, 1, 2, 2} // if table object
 											},
 											SNMPValue{
 													SNMPDataType::Null,
@@ -84,9 +84,9 @@ Error SNMPClient::SetupConnection() {
 	return Error::None;
 }
 
-Error SNMPClient::SendBytes(Byte *msg, unsigned long long length) {
+Error SNMPClient::SendBytes(list<Byte> &msg, unsigned long long length) {
 	// try to send provided data into the socket
-	int sent = sendto(socket_, reinterpret_cast<const char*>(msg), static_cast<int>(length), 0, (struct sockaddr*)&server_, sizeof(server_));
+	int sent = sendto(socket_, reinterpret_cast<const char*>(msg.front()), static_cast<int>(length), 0, (struct sockaddr*)&server_, sizeof(server_));
 	if (sent == -1) {
 		return Error::CannotSendData;
 	} else if (sent != length) {
@@ -96,15 +96,18 @@ Error SNMPClient::SendBytes(Byte *msg, unsigned long long length) {
 	return Error::None;
 }
 
-Error SNMPClient::ReceiveBytes(vector<Byte> &bytes) {
+Error SNMPClient::ReceiveBytes(list<Byte> &to) {
 
 	const int kBufferSize = 100;
 	char buffer[kBufferSize];
-	vector<Byte> vec_buffer{};
 
 	int recvd = recvfrom(socket_, buffer, kBufferSize, 0, (struct sockaddr*)&server_, &server_info_length_);
 	if (recvd == -1) {
 		return Error::CannotReceiveData;
+	}
+
+	for (int i = 0; i < recvd; i++) {
+		to.push_back(buffer[i]);
 	}
 
 	return Error::None;
@@ -112,21 +115,21 @@ Error SNMPClient::ReceiveBytes(vector<Byte> &bytes) {
 
 Error SNMPClient::SendGetPacket(SNMPGetPacket *packet) {
 
-	// Marshal packet into the bytes vector
-	std::vector<Byte> bytes{};
+	// Marshal packet into the bytes queue
+	std::list<Byte> bytes{};
 	Error err = packet->Marshal(bytes);
 	if (err != Error::None) {
 		return err;
 	}
 
-	return SendBytes(bytes.data(), bytes.size());
+	return SendBytes(bytes, bytes.size());
 }
 
 Error SNMPClient::ReceiveGetPacket(SNMPGetPacket *packet) {
 
-	// create vector of bytes and unmarshal the packet
+	// create queue of bytes and unmarshal the packet
 	// from it
-	std::vector<Byte> bytes{};
+	std::list<Byte> bytes{};
 	ReceiveBytes(bytes);
 
 	Error err = packet->Unmarshal(bytes);

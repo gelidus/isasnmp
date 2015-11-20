@@ -51,9 +51,9 @@ public:
 private:
 		Error SetupConnection();
 
-		Error SendBytes(Byte *msg, unsigned long long length);
+		Error SendBytes(std::list<Byte> &msg, unsigned long long length);
 
-		Error ReceiveBytes(std::vector<Byte> &bytes);
+		Error ReceiveBytes(std::list<Byte> &bytes);
 
 		Error SendGetPacket(SNMPGetPacket *packet);
 
