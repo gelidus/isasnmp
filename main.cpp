@@ -6,6 +6,41 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
+	SNMPGetPacket ifTablePacket{
+			SNMPDataType::Sequence,
+			SNMPInteger{kSNMPVersion},
+			SNMPOctetString{"public"},
+			SNMPPDU{
+					SNMPDataType::GetNextRequest,
+					SNMPInteger{1}, // request_id
+					SNMPInteger{0}, // error
+					SNMPInteger{0}, // error index
+					SNMPVarbindList{
+							list<SNMPVarbind>{
+									SNMPVarbind{ // add varbind for the object of iftable
+											SNMPObjectIdentifier{
+													list<Byte>{1, 3, 6, 1, 2, 1, 2, 2} // if table object
+											},
+											SNMPValue{
+													SNMPDataType::Null,
+													nullptr
+											}
+									}
+							}
+					}
+			}
+	};
+
+	list<Byte> to{};
+
+	ifTablePacket.Marshal(to);
+
+	for (auto i = to.begin(); i != to.end(); i++) {
+		cout << hex << static_cast<int>(*i) << " ";
+	}
+
+	return 0;
+
 	int flag; // input flags are: -i interval, -c community_string
 	opterr = 0; // clear error flag
 

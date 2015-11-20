@@ -4,7 +4,9 @@
 
 #include "SNMPPacket.h"
 
-SNMPInteger::SNMPInteger() {}
+SNMPInteger::SNMPInteger() {
+	set_type(SNMPDataType::Integer);
+}
 
 SNMPInteger::SNMPInteger(int value) {
 	value_ = value;
@@ -23,10 +25,9 @@ Error SNMPInteger::Marshal(std::list<Byte> &to) {
 }
 
 Error SNMPInteger::Unmarshal(std::list<Byte> &from) {
-	SNMPDataType t = static_cast<SNMPDataType>(from.front());
+	set_type(static_cast<SNMPDataType>(from.front()));
 	from.pop_front(); // data type
 
-	int length = from.front();
 	from.pop_front(); // length
 
 	value_ = from.front(); // retrieve value from of the integer
@@ -36,23 +37,29 @@ Error SNMPInteger::Unmarshal(std::list<Byte> &from) {
 }
 
 Byte SNMPInteger::length() {
-	return sizeof(Byte);
+	return kSNMPHeaderSize + sizeof(Byte);
 }
 
 
 SNMPOctetString::SNMPOctetString() {
-
+	set_type(SNMPDataType::OctetString);
 }
 
 SNMPOctetString::SNMPOctetString(std::string value) {
-
+	value_ = value;
+	set_type(SNMPDataType::OctetString);
 }
 
-SNMPOctetString::~SNMPOctetString() {
-
-}
+SNMPOctetString::~SNMPOctetString() {}
 
 Error SNMPOctetString::Marshal(std::list<Byte> &to) {
+	to.push_back(type());
+	to.push_back(length());
+
+	for (auto it = value_.begin(); it != value_.end(); it++) {
+		to.push_back(static_cast<Byte>(*it));
+	}
+
 	return Error::None;
 }
 
@@ -61,7 +68,7 @@ Error SNMPOctetString::Unmarshal(std::list<Byte> &from) {
 }
 
 Byte SNMPOctetString::length() {
-	return 0;
+	return static_cast<Byte>(value_.length());
 }
 
 
@@ -139,6 +146,7 @@ Byte SNMPVarbind::length() {
 	return 0;
 }
 
+
 SNMPVarbindList::SNMPVarbindList() {
 
 }
@@ -167,12 +175,15 @@ Byte SNMPVarbindList::length() {
 	return 0;
 }
 
-SNMPPDU::SNMPPDU() {
 
-}
+SNMPPDU::SNMPPDU() {}
 
-SNMPPDU::SNMPPDU(SNMPInteger request_id, SNMPInteger error, SNMPInteger error_index, SNMPVarbindList varbins) {
-
+SNMPPDU::SNMPPDU(SNMPDataType type, SNMPInteger request_id, SNMPInteger error, SNMPInteger error_index, SNMPVarbindList varbinds) {
+	set_type(type);
+	request_id_ = request_id;
+	error_ = error;
+	error_index_ = error_index;
+	varbinds_ = varbinds;
 }
 
 SNMPPDU::~SNMPPDU() {
@@ -180,6 +191,13 @@ SNMPPDU::~SNMPPDU() {
 }
 
 Error SNMPPDU::Marshal(std::list<Byte> &to) {
+	to.push_back(type());
+	to.push_back(length());
+	request_id_.Marshal(to);
+	error_.Marshal(to);
+	error_index_.Marshal(to);
+	varbinds_.Marshal(to);
+
 	return Error::None;
 }
 
@@ -188,8 +206,9 @@ Error SNMPPDU::Unmarshal(std::list<Byte> &from) {
 }
 
 Byte SNMPPDU::length() {
-	return 0;
+	return kSNMPHeaderSize + request_id_.length() + error_.length() + error_index_.length() + varbinds_.length();
 }
+
 
 SNMPGetPacket::SNMPGetPacket() {
 
@@ -197,7 +216,10 @@ SNMPGetPacket::SNMPGetPacket() {
 
 SNMPGetPacket::SNMPGetPacket(SNMPDataType type, SNMPInteger version, SNMPOctetString community_string,
 														 SNMPPDU snmppdu) {
-
+	set_type(type);
+	version_ = version;
+	community_string_ = community_string;
+	pdu_ = snmppdu;
 }
 
 SNMPGetPacket::~SNMPGetPacket() {
@@ -205,6 +227,14 @@ SNMPGetPacket::~SNMPGetPacket() {
 }
 
 Error SNMPGetPacket::Marshal(std::list<Byte> &to) {
+	to.clear();
+
+	to.push_back(type()); // type is first
+	to.push_back(length()); // length of the packet is second
+	version_.Marshal(to); // version is third
+	community_string_.Marshal(to); // 4
+	pdu_.Marshal(to); // 5
+
 	return Error::None;
 }
 
@@ -213,5 +243,5 @@ Error SNMPGetPacket::Unmarshal(std::list<Byte> &from) {
 }
 
 Byte SNMPGetPacket::length() {
-	return 0;
+	return kSNMPHeaderSize + version_.length() + community_string_.length() + pdu_.length();
 }

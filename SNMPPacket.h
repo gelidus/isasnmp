@@ -164,7 +164,7 @@ private:
 
 public:
 		SNMPPDU();
-		SNMPPDU(SNMPInteger request_id, SNMPInteger error, SNMPInteger error_index, SNMPVarbindList varbins);
+		SNMPPDU(SNMPDataType type, SNMPInteger request_id, SNMPInteger error, SNMPInteger error_index, SNMPVarbindList varbinds);
 		virtual ~SNMPPDU();
 
 		virtual Error Marshal(std::list<Byte> &to) override;

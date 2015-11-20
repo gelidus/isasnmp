@@ -7,6 +7,8 @@
 
 typedef unsigned char Byte;
 
+const Byte kSNMPHeaderSize = 2;
+
 enum class Error {
 		None,
 		CannotCreateSocket,

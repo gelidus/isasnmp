@@ -35,12 +35,13 @@ Error SNMPClient::Run() {
 	// first packet for the interface table
 	SNMPGetPacket ifTablePacket{
 			SNMPDataType::Sequence,
-			kSNMPVersion,
-			community_,
+			SNMPInteger{kSNMPVersion},
+			SNMPOctetString{community_},
 			SNMPPDU{
-					1, // request_id
-					0, // error
-					0, // error index
+					SNMPDataType::GetNextRequest,
+					SNMPInteger{1}, // request_id
+					SNMPInteger{0}, // error
+					SNMPInteger{0}, // error index
 					SNMPVarbindList{
 							list<SNMPVarbind>{
 									SNMPVarbind{ // add varbind for the object of iftable
@@ -56,6 +57,8 @@ Error SNMPClient::Run() {
 					}
 			}
 	};
+
+	SendGetPacket(&ifTablePacket);
 
 	for (;;) {
 
