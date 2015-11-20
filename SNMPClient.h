@@ -6,6 +6,7 @@
 #define ISA_SNMPAGENT_H
 
 #include <iostream>
+#include "SNMPPacket.h"
 
 #ifdef __unix__
 #include<sys/socket.h>
@@ -14,20 +15,14 @@
 #include<unistd.h>
 #include<netdb.h>
 #include<err.h>
+#include <fcntl.h>
 #else
 #include <winsock2.h>
-#include "SNMPPacket.h"
-
 #pragma comment(lib,"ws2_32.lib")
 #endif
 
 const int SNMPVersion = 0x00;
 const int SNMPPort = 161;
-
-enum SNMPProtocol : unsigned char {
-		GetNextRequest = 0xa1,
-		GetResponse = 0xa2
-};
 
 class SNMPClient {
 private:
@@ -44,6 +39,7 @@ private:
 #else
 		SOCKET socket_;
 		int server_info_length_;
+		unsigned long dont_block_ = 1;
 #endif
 
 public:
@@ -55,13 +51,13 @@ public:
 private:
 		Error SetupConnection();
 
-		Error SendMessage(char *msg, int length);
+		Error SendBytes(Byte *msg, unsigned long long length);
 
-		Error ReceiveMessage(int length, char *msg);
+		Error ReceiveBytes(std::vector<Byte> &bytes);
 
-		Error SendPacket(SNMPPacket *packet);
+		Error SendGetPacket(SNMPGetPacket *packet);
 
-		Error ReceivePacket(SNMPPacket *packet);
+		Error ReceiveGetPacket(SNMPGetPacket *packet);
 };
 
 

@@ -3,11 +3,19 @@
 //
 
 #include "SNMPClient.h"
+#include <memory>
+#include <vector>
+
+using namespace std;
 
 SNMPClient::SNMPClient(std::string address, std::string community, int interval) {
 	address_ = address;
 	community_ = community;
 	interval_ = interval;
+
+#ifndef __unix__
+	dont_block_ = 1;
+#endif
 }
 
 SNMPClient::~SNMPClient() {
@@ -24,8 +32,6 @@ Error SNMPClient::Run() {
 		return err;
 	}
 
-	SNMPPacket ifTable{SNMPVersion, community_, SNMPProtocol::GetNextRequest };
-
 	for (;;) {
 
 	}
@@ -41,28 +47,37 @@ Error SNMPClient::SetupConnection() {
 	server_.sin_family = AF_INET;
 	server_.sin_port = htons(SNMPPort);
 
+	server_info_length_ = sizeof(server_);
+
+#ifdef __unix__
+	int flags = fcntl(socket_, F_GETFL, 0);
+  fcntl(socket_, F_SETFL, flags | O_NONBLOCK);
+#else
+	ioctlsocket(socket_, FIONBIO, &dont_block_);
+#endif
+
 	return Error::None;
 }
 
-Error SNMPClient::SendMessage(char *msg, int length) {
+Error SNMPClient::SendBytes(Byte *msg, unsigned long long length) {
 	// try to send provided data into the socket
-	int sent = sendto(socket_, msg, length, 0, (struct sockaddr*)&server_, sizeof(server_));
+	int sent = sendto(socket_, reinterpret_cast<const char*>(msg), static_cast<int>(length), 0, (struct sockaddr*)&server_, sizeof(server_));
 	if (sent == -1) {
 		return Error::CannotSendData;
 	} else if (sent != length) {
 		return Error::CannotSendFullData;
 	}
 
-	server_info_length_ = sizeof(server_);
-
 	return Error::None;
 }
 
-Error SNMPClient::ReceiveMessage(int length, char *msg) {
+Error SNMPClient::ReceiveBytes(vector<Byte> &bytes) {
 
-	char buffer[length];
+	const int kBufferSize = 100;
+	char buffer[kBufferSize];
+	vector<Byte> vec_buffer{};
 
-	int recvd = recvfrom(socket_, buffer, length, 0, (struct sockaddr*)&server_, &server_info_length_);
+	int recvd = recvfrom(socket_, buffer, kBufferSize, 0, (struct sockaddr*)&server_, &server_info_length_);
 	if (recvd == -1) {
 		return Error::CannotReceiveData;
 	}
@@ -70,13 +85,29 @@ Error SNMPClient::ReceiveMessage(int length, char *msg) {
 	return Error::None;
 }
 
-Error SNMPClient::SendPacket(SNMPPacket *packet) {
-	std::vector<Byte> bytes{};
+Error SNMPClient::SendGetPacket(SNMPGetPacket *packet) {
 
-	return Error::None;
+	// Marshal packet into the bytes vector
+	std::vector<Byte> bytes{};
+	Error err = packet->Marshal(bytes);
+	if (err != Error::None) {
+		return err;
+	}
+
+	return SendBytes(bytes.data(), bytes.size());
 }
 
-Error SNMPClient::ReceivePacket(SNMPPacket *packet) {
+Error SNMPClient::ReceiveGetPacket(SNMPGetPacket *packet) {
+
+	// create vector of bytes and unmarshal the packet
+	// from it
+	std::vector<Byte> bytes{};
+	ReceiveBytes(bytes);
+
+	Error err = packet->Unmarshal(bytes);
+	if (err != Error::None) {
+		return err;
+	}
 
 	return Error::None;
 }
