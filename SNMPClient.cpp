@@ -29,32 +29,11 @@ Error SNMPClient::Run() {
 	}
 
 	// first packet for the interface table
-	SNMPGetPacket ifTablePacket{
-			SNMPDataType::Sequence,
-			SNMPInteger{kSNMPVersion},
-			SNMPOctetString{community_},
-			SNMPPDU{
-					SNMPDataType::GetNextRequest,
-					SNMPInteger{1}, // request_id
-					SNMPInteger{0}, // error
-					SNMPInteger{0}, // error index
-					SNMPVarbindList{
-							list<SNMPVarbind>{
-									SNMPVarbind{ // add varbind for the object of iftable
-											SNMPObjectIdentifier{
-													list<Byte>{1, 3, 6, 1, 2, 1, 2, 2} // if table object
-											},
-											SNMPValue{
-													SNMPDataType::Null,
-													nullptr
-											}
-									}
-							}
-					}
-			}
-	};
+	SNMPGetPacket *ifTablePacket = CreateGetPacket(SNMPObjectIdentifier{
+			list<Byte>{1, 3, 6, 1, 2, 1, 2, 2}
+	});
 
-	err = SendGetPacket(&ifTablePacket);
+	err = SendGetPacket(ifTablePacket);
 	if (err != Error::None) {
 		return err;
 	}
@@ -65,12 +44,17 @@ Error SNMPClient::Run() {
 		return err;
 	}
 
+	SNMPGetPacket *nextRequest = CreateGetPacket(SNMPObjectIdentifier{
+			response.pdu().varbinds().binds().begin()->identifier().value()
+	});
+	SendGetPacket(nextRequest);
+
 	cout << "id: " << response.pdu().request_id().value() << endl;
 	cout << "oids: " << response.pdu().varbinds().binds().size() << endl;
 	cout << "oid: " << endl;
 	auto oidlist = response.pdu().varbinds().binds().begin()->identifier().value();
 	for (auto b = oidlist.begin(); b != oidlist.end(); b++) {
-		cout << (*b) << " ";
+		cout << hex << (int)(*b) << " ";
 	}
 	cout << endl;
 
@@ -160,4 +144,33 @@ Error SNMPClient::ReceiveGetPacket(SNMPGetPacket *packet) {
 
 	// unmarshal
 	return packet->Unmarshal(byte_list);
+}
+
+
+SNMPGetPacket *SNMPClient::CreateGetPacket(SNMPObjectIdentifier oid) {
+	return new SNMPGetPacket{
+			SNMPDataType::Sequence,
+			SNMPInteger{kSNMPVersion},
+			SNMPOctetString{community_},
+			SNMPPDU{
+					SNMPDataType::GetNextRequest,
+					SNMPInteger{1}, // request_id
+					SNMPInteger{0}, // error
+					SNMPInteger{0}, // error index
+					SNMPVarbindList{
+							list<SNMPVarbind>{
+									SNMPVarbind{ // add varbind for the object of iftable
+											oid,
+											//SNMPObjectIdentifier{
+											//		list<Byte>{1, 3, 6, 1, 2, 1, 2, 2} // if table object
+											//},
+											SNMPValue{
+													SNMPDataType::Null,
+													nullptr
+											}
+									}
+							}
+					}
+			}
+	};
 }

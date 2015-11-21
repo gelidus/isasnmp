@@ -57,6 +57,8 @@ private:
 		Error SendGetPacket(SNMPGetPacket *packet);
 
 		Error ReceiveGetPacket(SNMPGetPacket *packet);
+
+		SNMPGetPacket *CreateGetPacket(SNMPObjectIdentifier oid);
 };
 
 
