@@ -180,6 +180,8 @@ SNMPValue::~SNMPValue() {
 }
 
 Error SNMPValue::Marshal(std::list<Byte> &to) {
+	// TODO: SNMPValue marshalling should be able to
+	// marhsall all the stuff, but we dont need it now
 	to.push_back(type());
 	to.push_back(0);
 
@@ -203,12 +205,20 @@ Error SNMPValue::Unmarshal(std::list<Byte> &from) {
 		case SNMPDataType::ObjectIdentifier: {
 			value_ = new SNMPObjectIdentifier{};
 		}
+		case SNMPDataType::Null: {
+			// pop both, type and length, as nothing can
+			// process them (special type of variable)
+			from.pop_front();
+			from.pop_front();
+			value_ = nullptr;
+		}
 		default:
 			return Error::SNMPValueUnrecognized;
 	}
 
-	value_->Unmarshal(from);
-
+	if (value_ != nullptr) {
+		value_->Unmarshal(from);
+	}
 
 	return Error::None;
 }
