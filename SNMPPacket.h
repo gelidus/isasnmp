@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include <list>
-#include <deque>
+#include <vector>
 #include "types.h"
 
 // SNMPEntity is semi-abstract class that provides interface
@@ -52,7 +52,7 @@ public:
 		// The input list will now be cleared, as this is recursive
 		// builder. Marhshal should call other marshals in this structure
 		// to correctly continue in the building
-		virtual Error Marshal(std::list<Byte> &to) = 0;
+		virtual Error Marshal(std::vector<Byte> &to) = 0;
 
 		// Unmarshal works with the input byte list, trying it to
 		// deserialize into the current structure. If the data
@@ -72,7 +72,7 @@ public:
 		SNMPInteger(long long value);
 		virtual ~SNMPInteger();
 
-		virtual Error Marshal(std::list<Byte> &to) override;
+		virtual Error Marshal(std::vector<Byte> &to) override;
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();
@@ -90,7 +90,7 @@ public:
 		SNMPOctetString(std::string value);
 		virtual ~SNMPOctetString();
 
-		virtual Error Marshal(std::list<Byte> &to) override;
+		virtual Error Marshal(std::vector<Byte> &to) override;
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();
@@ -107,7 +107,7 @@ public:
 		SNMPObjectIdentifier(std::list<Byte> value);
 		virtual ~SNMPObjectIdentifier();
 
-		virtual Error Marshal(std::list<Byte> &to) override;
+		virtual Error Marshal(std::vector<Byte> &to) override;
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();
@@ -124,7 +124,7 @@ public:
 		SNMPValue(SNMPDataType type, SNMPEntity *value = nullptr);
 		virtual ~SNMPValue();
 
-		virtual Error Marshal(std::list<Byte> &to) override;
+		virtual Error Marshal(std::vector<Byte> &to) override;
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();
@@ -143,7 +143,7 @@ public:
 		SNMPVarbind(SNMPObjectIdentifier identifier, SNMPValue value);
 		virtual ~SNMPVarbind();
 
-		virtual Error Marshal(std::list<Byte> &to) override;
+		virtual Error Marshal(std::vector<Byte> &to) override;
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();
@@ -166,7 +166,7 @@ public:
 		// for the purpose of dynamic adding while Unmarshalling
 		bool Add(SNMPVarbind varbind);
 
-		virtual Error Marshal(std::list<Byte> &to) override;
+		virtual Error Marshal(std::vector<Byte> &to) override;
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();
@@ -186,7 +186,7 @@ public:
 		SNMPPDU(SNMPDataType type, SNMPInteger request_id, SNMPInteger error, SNMPInteger error_index, SNMPVarbindList varbinds);
 		virtual ~SNMPPDU();
 
-		virtual Error Marshal(std::list<Byte> &to) override;
+		virtual Error Marshal(std::vector<Byte> &to) override;
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();
@@ -206,7 +206,7 @@ public:
 		SNMPGetPacket(SNMPDataType type, SNMPInteger version, SNMPOctetString community_string, SNMPPDU);
 		virtual ~SNMPGetPacket();
 
-		virtual Error Marshal(std::list<Byte> &to) override;
+		virtual Error Marshal(std::vector<Byte> &to) override;
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();

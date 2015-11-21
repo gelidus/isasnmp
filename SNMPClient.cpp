@@ -74,31 +74,28 @@ Error SNMPClient::SetupConnection() {
 	return Error::None;
 }
 
-Error SNMPClient::SendBytes(list<Byte> &msg, unsigned long long length) {
+Error SNMPClient::SendBytes(vector<Byte> &msg, int length) {
 	// try to send provided data into the socket
-	int sent = sendto(socket_, reinterpret_cast<const char*>(msg.front()), static_cast<int>(length), 0, (struct sockaddr*)&server_, sizeof(server_));
+	int sent = sendto(socket_, reinterpret_cast<const char*>(msg.data()), length, 0, (struct sockaddr*)&server_, sizeof(server_));
 	if (sent == -1) {
 		return Error::CannotSendData;
-	} else if (sent != static_cast<int>(length)) {
+	} else if (sent != length) {
 		return Error::CannotSendFullData;
 	}
 
 	return Error::None;
 }
 
-Error SNMPClient::ReceiveBytes(list<Byte> &to) {
+Error SNMPClient::ReceiveBytes(vector<Byte> &to, int length) {
 
-	const int kBufferSize = 100;
-	char buffer[kBufferSize];
+	char *buffer = new char[length];
 
-	int recvd = recvfrom(socket_, buffer, kBufferSize, 0, (struct sockaddr*)&server_, &server_info_length_);
+	int recvd = recvfrom(socket_, buffer, length, 0, (struct sockaddr*)&server_, &server_info_length_);
 	if (recvd == -1) {
 		return Error::CannotReceiveData;
 	}
 
-	for (int i = 0; i < recvd; i++) {
-		to.push_back(buffer[i]);
-	}
+	std::copy(buffer, buffer + length, std::back_inserter(to));
 
 	return Error::None;
 }
@@ -106,7 +103,7 @@ Error SNMPClient::ReceiveBytes(list<Byte> &to) {
 Error SNMPClient::SendGetPacket(SNMPGetPacket *packet) {
 
 	// Marshal packet into the bytes queue
-	std::list<Byte> bytes{};
+	std::vector<Byte> bytes{};
 	Error err = packet->Marshal(bytes);
 	if (err != Error::None) {
 		return err;
@@ -117,15 +114,19 @@ Error SNMPClient::SendGetPacket(SNMPGetPacket *packet) {
 
 Error SNMPClient::ReceiveGetPacket(SNMPGetPacket *packet) {
 
-	// create queue of bytes and unmarshal the packet
-	// from it
-	std::list<Byte> bytes{};
-	ReceiveBytes(bytes);
+	// receive first 2 bytes from the client
+	// to get packet type and total upcoming length
+	vector<Byte> bytes{};
+	ReceiveBytes(bytes, 2);
 
-	Error err = packet->Unmarshal(bytes);
-	if (err != Error::None) {
-		return err;
-	}
+	// receive the rest bytes of the packet
+	// based on the second byte (length)
+	ReceiveBytes(bytes, bytes[1]);
 
-	return Error::None;
+	// create list for the unmarshal
+	std::list<Byte> byte_list{};
+	byte_list.assign(bytes.begin(), bytes.end());
+
+	// unmarshal
+	return packet->Unmarshal(byte_list);
 }

@@ -6,16 +6,16 @@
 #define ISA_SNMPAGENT_H
 
 #include <iostream>
+#include <vector>
 #include "SNMPPacket.h"
 
 #ifdef __unix__
-#include<sys/socket.h>
-#include<arpa/inet.h>
-#include<netinet/in.h>
-#include<unistd.h>
-#include<netdb.h>
-#include<err.h>
-#include <fcntl.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <netdb.h>
+#include <err.h>
 #else
 #include <winsock2.h>
 #pragma comment(lib,"ws2_32.lib")
@@ -50,9 +50,9 @@ public:
 private:
 		Error SetupConnection();
 
-		Error SendBytes(std::list<Byte> &msg, unsigned long long length);
+		Error SendBytes(std::vector<Byte> &msg, int length);
 
-		Error ReceiveBytes(std::list<Byte> &bytes);
+		Error ReceiveBytes(std::vector<Byte> &bytes, int length);
 
 		Error SendGetPacket(SNMPGetPacket *packet);
 

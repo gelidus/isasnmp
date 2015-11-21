@@ -16,7 +16,8 @@ SNMPInteger::SNMPInteger(long long value) {
 
 SNMPInteger::~SNMPInteger() {}
 
-Error SNMPInteger::Marshal(std::list<Byte> &to) {
+Error SNMPInteger::Marshal(std::vector
+															 <Byte> &to) {
 	to.push_back(SNMPDataType::Integer);
 
 	// calculate last byte index that should be transfered
@@ -69,7 +70,8 @@ SNMPOctetString::SNMPOctetString(std::string value) {
 
 SNMPOctetString::~SNMPOctetString() {}
 
-Error SNMPOctetString::Marshal(std::list<Byte> &to) {
+Error SNMPOctetString::Marshal(std::vector
+																	 <Byte> &to) {
 	to.push_back(type());
 	to.push_back(static_cast<Byte>(value_.length()));
 
@@ -112,7 +114,8 @@ SNMPObjectIdentifier::SNMPObjectIdentifier(std::list<Byte> value) {
 
 SNMPObjectIdentifier::~SNMPObjectIdentifier() {}
 
-Error SNMPObjectIdentifier::Marshal(std::list<Byte> &to) {
+Error SNMPObjectIdentifier::Marshal(std::vector
+																				<Byte> &to) {
 	to.push_back(type());
 	to.push_back(static_cast<Byte>(value_.size() - 1));
 
@@ -179,7 +182,8 @@ SNMPValue::~SNMPValue() {
 	}
 }
 
-Error SNMPValue::Marshal(std::list<Byte> &to) {
+Error SNMPValue::Marshal(std::vector
+														 <Byte> &to) {
 	// TODO: SNMPValue marshalling should be able to
 	// marhsall all the stuff, but we dont need it now
 	to.push_back(type());
@@ -245,7 +249,8 @@ SNMPVarbind::~SNMPVarbind() {
 
 }
 
-Error SNMPVarbind::Marshal(std::list<Byte> &to) {
+Error SNMPVarbind::Marshal(std::vector
+															 <Byte> &to) {
 	to.push_back(type());
 	to.push_back(identifier_.length() + value_.length());
 	identifier_.Marshal(to);
@@ -291,7 +296,8 @@ bool SNMPVarbindList::Add(SNMPVarbind varbind) {
 	return true;
 }
 
-Error SNMPVarbindList::Marshal(std::list<Byte> &to) {
+Error SNMPVarbindList::Marshal(std::vector
+																	 <Byte> &to) {
 	to.push_back(type());
 
 	// get the length of the elements
@@ -348,7 +354,8 @@ SNMPPDU::~SNMPPDU() {
 
 }
 
-Error SNMPPDU::Marshal(std::list<Byte> &to) {
+Error SNMPPDU::Marshal(std::vector
+													 <Byte> &to) {
 	to.push_back(type());
 	to.push_back(request_id_.length() + error_.length() + error_index_.length() + varbinds_.length());
 	request_id_.Marshal(to);
@@ -395,7 +402,8 @@ SNMPGetPacket::~SNMPGetPacket() {
 
 }
 
-Error SNMPGetPacket::Marshal(std::list<Byte> &to) {
+Error SNMPGetPacket::Marshal(std::vector
+																 <Byte> &to) {
 	to.clear();
 
 	to.push_back(type()); // type is first
