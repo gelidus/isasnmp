@@ -63,6 +63,7 @@ Error SNMPClient::RetrieveInformation() {
 	}
 
 	interface_container_.OutputResults();
+	return Error::None;
 }
 
 Error SNMPClient::SetupConnection() {
