@@ -65,12 +65,14 @@ Error SNMPClient::Run() {
 		return err;
 	}
 
-	cout << "id: " << response.pdu().request_id().value();
-	cout << "oid: ";
-	auto oidlist = response.pdu().varbinds().iterator()->identifier().value();
+	cout << "id: " << response.pdu().request_id().value() << endl;
+	cout << "oids: " << response.pdu().varbinds().binds().size() << endl;
+	cout << "oid: " << endl;
+	auto oidlist = response.pdu().varbinds().binds().begin()->identifier().value();
 	for (auto b = oidlist.begin(); b != oidlist.end(); b++) {
 		cout << (*b) << " ";
 	}
+	cout << endl;
 
 	return Error::None;
 }

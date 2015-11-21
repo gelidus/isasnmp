@@ -182,7 +182,7 @@ public:
 
 		virtual Byte length();
 
-		std::list<SNMPVarbind>::iterator iterator() { return varbinds_.begin(); }
+		std::list<SNMPVarbind>& binds() { return varbinds_; }
 };
 
 // SNMPPDUEntity implements the entity interface which
