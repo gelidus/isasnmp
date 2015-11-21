@@ -74,6 +74,9 @@ Error SNMPClient::SetupConnection() {
 		return Error::CannotCreateSocket;
 	}
 
+#ifndef __unix__
+	server_.sin_addr.s_addr = inet_addr(this->address_.c_str());
+#else
 	int conversion = inet_aton(this->address_.c_str(), &server_.sin_addr);
 	if (conversion == 0) {
 		// given input could not be translated
@@ -83,6 +86,7 @@ Error SNMPClient::SetupConnection() {
 		}
 		memcpy(&server_.sin_addr, host->h_addr_list[0], host->h_length);
 	}
+#endif
 	server_.sin_family = AF_INET;
 	server_.sin_port = htons(kSNMPPort);
 
