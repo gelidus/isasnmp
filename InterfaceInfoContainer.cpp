@@ -2,8 +2,7 @@
 // Created by Peter on 11/21/2015.
 //
 
-#include <ctime>
-#include <iomanip>
+#include <time.h>
 #include <chrono>
 #include "InterfaceInfoContainer.h"
 
@@ -44,8 +43,17 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 				std::chrono::system_clock::now().time_since_epoch()
 		);
 
-		std::time_t t = std::time(nullptr);
-		interfaces_[interface] << std::put_time(std::localtime(&t), "%Y-%m-%d %H:%M:%S.");
+		char buffer[100];
+
+		time_t raw_time;
+		time(&raw_time);
+
+		struct tm* time_info;
+		time_info = localtime(&raw_time);
+
+		strftime(buffer, 100, "%Y-%m-%d %H:%M:%S.", time_info);
+
+		interfaces_[interface] << buffer;
 		interfaces_[interface] << (ms.count() % 1000);
 	} else {
 		// existing interface
