@@ -8,13 +8,14 @@
 #include "SNMPPacket.h"
 
 class InterfaceInfoContainer {
-		int i;
 
 public:
 		InterfaceInfoContainer();
 		virtual ~InterfaceInfoContainer();
 
 		Error ProcessPacket(SNMPGetPacket *packet);
+
+		void OutputResults();
 };
 
 

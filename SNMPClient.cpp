@@ -12,6 +12,8 @@ SNMPClient::SNMPClient(std::string address, std::string community, int interval)
 	address_ = address;
 	community_ = community;
 	interval_ = interval;
+
+	last_request_id_ = 1;
 }
 
 SNMPClient::~SNMPClient() {
@@ -23,6 +25,10 @@ SNMPClient::~SNMPClient() {
 }
 
 Error SNMPClient::Run() {
+	RetrieveInformation();
+}
+
+Error SNMPClient::RetrieveInformation() {
 	Error err = SetupConnection();
 	if (err != Error::None) {
 		return err;
@@ -46,6 +52,7 @@ Error SNMPClient::Run() {
 		}
 
 		err = interface_container_.ProcessPacket(&response);
+		// next iteration is on the given object
 		oid = response.pdu().varbinds().binds().begin()->identifier().value();
 	} while (err == Error::None);
 
@@ -54,6 +61,8 @@ Error SNMPClient::Run() {
 	} else {
 		return err; // else we should return the correct error
 	}
+
+	interface_container_.OutputResults();
 }
 
 Error SNMPClient::SetupConnection() {
@@ -85,12 +94,12 @@ Error SNMPClient::SetupConnection() {
 	return Error::None;
 }
 
-Error SNMPClient::SendBytes(vector<Byte> &msg, int length) {
+Error SNMPClient::SendBytes(vector<Byte> &msg) {
 	// try to send provided data into the socket
-	int sent = sendto(socket_, reinterpret_cast<const char*>(msg.data()), length, 0, (struct sockaddr*)&server_, sizeof(server_));
+	int sent = sendto(socket_, reinterpret_cast<const char*>(msg.data()), static_cast<int>(msg.size()), 0, (struct sockaddr*)&server_, sizeof(server_));
 	if (sent == -1) {
 		return Error::CannotSendData;
-	} else if (sent != length) {
+	} else if (sent != static_cast<int>(msg.size())) {
 		return Error::CannotSendFullData;
 	}
 
@@ -122,7 +131,7 @@ Error SNMPClient::SendGetPacket(SNMPGetPacket *packet) {
 
 	cout << "Sending bytes " << bytes.size() << endl;
 
-	return SendBytes(bytes, static_cast<int>(bytes.size()));
+	return SendBytes(bytes);
 }
 
 Error SNMPClient::ReceiveGetPacket(SNMPGetPacket *packet) {
@@ -168,4 +177,8 @@ SNMPGetPacket *SNMPClient::CreateGetPacket(SNMPObjectIdentifier oid) {
 					}
 			}
 	};
+}
+
+int SNMPClient::GenerateRequestID() {
+	return last_request_id_++;
 }

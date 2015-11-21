@@ -7,6 +7,9 @@
 
 typedef unsigned char Byte;
 
+// Every SNMP Block has type and length
+// This implementation does not handle
+// variadic block lengths. Max is 255
 const Byte kSNMPHeaderSize = 2;
 
 enum class Error {
@@ -43,6 +46,9 @@ union ByteLongLong {
 		char bytes[8];
 };
 
+// CalculateLastByteIndex returns the index
+// of the first (highest) one (1) in the
+// given number.
 int CalculateLastByteIndex(long long int);
 
 // byte conversion from numbers

@@ -26,9 +26,15 @@ const int kSNMPPort = 161;
 
 class SNMPClient {
 private:
-		// interface_container handles all information that
+		// interface_container_ handles all information that
 		// we have about interfaces
 		InterfaceInfoContainer interface_container_;
+
+		// last_request_id_ is generator helper variable
+		// that is incremented each time the generator is
+		// called. This should not be manually incremented
+		// as the GenerateRequestID() may be reimplemented
+		int last_request_id_;
 
 		// global client settings
 		std::string address_;
@@ -49,20 +55,39 @@ public:
 		SNMPClient(std::string address, std::string community, int interval);
 		virtual ~SNMPClient();
 
+		// Run will start the connection to the
 		Error Run();
 
+		Error RetrieveInformation();
+
 private:
+		// SetupConnection creates the socket that will be used
+		// for the communication with the SNMP agent. The connection
+		// will be set up on the default port and given address
 		Error SetupConnection();
 
-		Error SendBytes(std::vector<Byte> &msg, int length);
+		// SendBytes sends the vector of bytes to the client
+		// This method may end up with an error, if the data
+		// could not be correctly sent to the destination
+		Error SendBytes(std::vector<Byte> &msg);
 
+		// ReceiveBytes will store maximum of provided length
+		// bytes into the given vector. This method may end up
+		// with an error, if the data could not be received.
+		// The length is just a maximum, not minimum. The socket
+		// will not block if smaller packet can be received.
 		Error ReceiveBytes(std::vector<Byte> &bytes, int length);
 
 		Error SendGetPacket(SNMPGetPacket *packet);
 
 		Error ReceiveGetPacket(SNMPGetPacket *packet);
 
+		// CreateGetPacket is a factory that is creating
+		// Get packets for the SNMP. Method will return the
+		// SNMP packet object, that already has all the defaults.
 		SNMPGetPacket *CreateGetPacket(SNMPObjectIdentifier oid);
+
+		int GenerateRequestID();
 };
 
 

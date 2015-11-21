@@ -7,7 +7,6 @@
 using namespace std;
 
 InterfaceInfoContainer::InterfaceInfoContainer() {
-	i = 0;
 }
 
 InterfaceInfoContainer::~InterfaceInfoContainer() {
@@ -16,10 +15,14 @@ InterfaceInfoContainer::~InterfaceInfoContainer() {
 
 Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 	cout << "Got packet id: " << packet->pdu().request_id().value() << endl;
-	i++;
 
-	if (i > 5) {
+	if (packet->pdu().varbinds().binds().begin()->identifier().value().size() > 11) {
 		return Error::SNMPNotAnInterface;
 	}
+
 	return Error::None;
+}
+
+void InterfaceInfoContainer::OutputResults() {
+
 }
