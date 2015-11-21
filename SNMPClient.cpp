@@ -26,6 +26,8 @@ SNMPClient::~SNMPClient() {
 
 Error SNMPClient::Run() {
 	RetrieveInformation();
+
+	return Error::None;
 }
 
 Error SNMPClient::RetrieveInformation() {
