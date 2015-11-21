@@ -27,6 +27,13 @@ enum SNMPDataType : Byte {
 		GetResponse = 0xa2
 };
 
+union ByteLongLong {
+		long long value;
+		char bytes[8];
+};
+
+int CalculateLastByteIndex(long long int);
+
 // byte conversion from numbers
 union ByteUInt {
 	unsigned int value;

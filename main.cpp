@@ -5,6 +5,19 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
+	SNMPOctetString i{"Hello World"};
+	list<Byte> to;
+
+	i.Marshal(to);
+
+	for (auto i = to.begin(); i != to.end(); i++) {
+		cout << hex << static_cast<int>(*i) << " ";
+	}
+
+	SNMPOctetString m{};
+	m.Unmarshal(to);
+
+	cout << "here";
 
 	SNMPGetPacket ifTablePacket{
 			SNMPDataType::Sequence,
@@ -30,8 +43,6 @@ int main(int argc, char *argv[]) {
 					}
 			}
 	};
-
-	list<Byte> to{};
 
 	ifTablePacket.Marshal(to);
 

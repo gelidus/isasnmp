@@ -50,11 +50,11 @@ public:
 // variable in the packet
 class SNMPInteger : public SNMPEntity {
 private:
-		int value_;
+		long long value_;
 
 public:
 		SNMPInteger();
-		SNMPInteger(int value);
+		SNMPInteger(long long value);
 		virtual ~SNMPInteger();
 
 		virtual Error Marshal(std::list<Byte> &to) override;

@@ -8,7 +8,7 @@ SNMPInteger::SNMPInteger() {
 	set_type(SNMPDataType::Integer);
 }
 
-SNMPInteger::SNMPInteger(int value) {
+SNMPInteger::SNMPInteger(long long value) {
 	value_ = value;
 
 	set_type(SNMPDataType::Integer);
@@ -18,8 +18,18 @@ SNMPInteger::~SNMPInteger() {}
 
 Error SNMPInteger::Marshal(std::list<Byte> &to) {
 	to.push_back(SNMPDataType::Integer);
-	to.push_back(sizeof(Byte));
-	to.push_back(static_cast<Byte>(value_));
+
+	// calculate last byte index that should be transfered
+	Byte length = static_cast<Byte>(CalculateLastByteIndex(value_) + 1);
+
+	// push the length
+	to.push_back(length);
+
+	// push the bytes of the value
+	ByteLongLong conv{value_};
+	for(int i = length-1; i >= 0; i--) {
+		to.push_back(static_cast<Byte>(conv.bytes[i]));
+	}
 
 	return Error::None;
 }
@@ -28,18 +38,24 @@ Error SNMPInteger::Unmarshal(std::list<Byte> &from) {
 	set_type(static_cast<SNMPDataType>(from.front()));
 	from.pop_front(); // data type
 
-	from.pop_front(); // length
-
-	value_ = from.front(); // retrieve value from of the integer
+	// retrieve length
+	Byte length = from.front();
 	from.pop_front();
+
+	ByteLongLong conv{0};
+	for (int i = length -1; i >= 0; i--) {
+		conv.bytes[i] = from.front();
+		from.pop_front();
+	}
+
+	value_ = conv.value;
 
 	return Error::None;
 }
 
 Byte SNMPInteger::length() {
-	return kSNMPHeaderSize + sizeof(Byte);
+	return kSNMPHeaderSize + static_cast<Byte>(CalculateLastByteIndex(value_));
 }
-
 
 SNMPOctetString::SNMPOctetString() {
 	set_type(SNMPDataType::OctetString);
@@ -64,6 +80,18 @@ Error SNMPOctetString::Marshal(std::list<Byte> &to) {
 }
 
 Error SNMPOctetString::Unmarshal(std::list<Byte> &from) {
+	set_type(static_cast<SNMPDataType>(from.front()));
+	from.pop_front();
+
+	Byte length = from.front();
+	from.pop_front();
+
+	value_ = "";
+	for (int i = 0; i < length; i++) {
+		value_ += from.front();
+		from.pop_front();
+	}
+
 	return Error::None;
 }
 
