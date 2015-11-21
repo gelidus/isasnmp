@@ -54,10 +54,16 @@ Error SNMPClient::Run() {
 			}
 	};
 
-	SendGetPacket(&ifTablePacket);
+	err = SendGetPacket(&ifTablePacket);
+	if (err != Error::None) {
+		return err;
+	}
 
 	SNMPGetPacket response{};
-	ReceiveGetPacket(&response);
+	err = ReceiveGetPacket(&response);
+	if (err != Error::None) {
+		return err;
+	}
 
 	return Error::None;
 }
