@@ -35,7 +35,7 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 	Byte interface = oid.back();
 
 	// check if the interface already exists
-	if (interfaces_.count(interface) < 0) {
+	if (interfaces_.count(interface) == 0) {
 		// non existing interface
 		interfaces_[interface] << "time";
 	} else {
