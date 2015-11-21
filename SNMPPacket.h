@@ -76,6 +76,8 @@ public:
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();
+
+		long long& value() { return value_; }
 };
 
 // SNMPOctetString encapsualtes the logic for the
@@ -94,6 +96,8 @@ public:
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();
+
+		std::string& value() { return value_; }
 };
 
 // SNMPObjectIdentifier implements the SNMPEntity interface
@@ -111,6 +115,8 @@ public:
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();
+
+		std::list<Byte>& value() { return value_; }
 };
 
 // SNMPValue represents any type. The type will be dynamically
@@ -128,6 +134,8 @@ public:
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();
+
+		SNMPEntity* value() { return value_; }
 };
 
 // SNMPVarbind is interface for the Varbind type of the
@@ -147,6 +155,9 @@ public:
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();
+
+		SNMPObjectIdentifier& identifier() { return identifier_; }
+		SNMPValue value() { return value_; }
 };
 
 // SNMPVarbindList encapsulates the varbins in the
@@ -170,6 +181,8 @@ public:
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();
+
+		std::list<SNMPVarbind>::iterator iterator() { return varbinds_.begin(); }
 };
 
 // SNMPPDUEntity implements the entity interface which
@@ -190,6 +203,11 @@ public:
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();
+
+		SNMPInteger& request_id() { return request_id_; }
+		SNMPInteger& error() { return error_; }
+		SNMPInteger& error_index() { return error_index_; }
+		SNMPVarbindList& varbinds() { return varbinds_; }
 };
 
 // SNMPGetPacket implements interface for the 'get' snmp
@@ -210,6 +228,8 @@ public:
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
 		virtual Byte length();
+
+		SNMPPDU& pdu() { return pdu_; }
 };
 
 #endif //ISA_SNMPPACKET_H
