@@ -56,11 +56,14 @@ Error SNMPClient::Run() {
 
 	err = SendGetPacket(&ifTablePacket);
 	if (err != Error::None) {
-		cout << "ERROR: " << static_cast<int>(err) << endl;
+		return err;
 	}
 
 	SNMPGetPacket response{};
-	ReceiveGetPacket(&response);
+	err = ReceiveGetPacket(&response);
+	if (err != Error::None) {
+		return err;
+	}
 
 	return Error::None;
 }
