@@ -46,6 +46,7 @@ Error SNMPClient::Run() {
 		}
 
 		err = interface_container_.ProcessPacket(&response);
+		oid = response.pdu().varbinds().binds().begin()->identifier().value();
 	} while (err == Error::None);
 
 	if (err == Error::SNMPNotAnInterface) {
