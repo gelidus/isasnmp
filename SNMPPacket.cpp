@@ -54,8 +54,9 @@ Error SNMPInteger::Unmarshal(std::list<Byte> &from) {
 }
 
 Byte SNMPInteger::length() {
-	return kSNMPHeaderSize + static_cast<Byte>(CalculateLastByteIndex(value_));
+	return kSNMPHeaderSize + static_cast<Byte>(CalculateLastByteIndex(value_) + 1);
 }
+
 
 SNMPOctetString::SNMPOctetString() {
 	set_type(SNMPDataType::OctetString);
@@ -70,7 +71,7 @@ SNMPOctetString::~SNMPOctetString() {}
 
 Error SNMPOctetString::Marshal(std::list<Byte> &to) {
 	to.push_back(type());
-	to.push_back(length());
+	to.push_back(static_cast<Byte>(value_.length()));
 
 	for (auto it = value_.begin(); it != value_.end(); it++) {
 		to.push_back(static_cast<Byte>(*it));
@@ -96,7 +97,7 @@ Error SNMPOctetString::Unmarshal(std::list<Byte> &from) {
 }
 
 Byte SNMPOctetString::length() {
-	return static_cast<Byte>(value_.length());
+	return kSNMPHeaderSize + static_cast<Byte>(value_.length());
 }
 
 
@@ -113,7 +114,7 @@ SNMPObjectIdentifier::~SNMPObjectIdentifier() {}
 
 Error SNMPObjectIdentifier::Marshal(std::list<Byte> &to) {
 	to.push_back(type());
-	to.push_back(length());
+	to.push_back(static_cast<Byte>(value_.size() - 1));
 
 	auto it = value_.begin();
 	for (int i = 0; i < value_.size(); i++, it++) {
@@ -158,12 +159,13 @@ Error SNMPObjectIdentifier::Unmarshal(std::list<Byte> &from) {
 }
 
 Byte SNMPObjectIdentifier::length() {
-	return value_.size() - 1; // -1 because the first two bytes are encoded as one
+	return kSNMPHeaderSize + static_cast<Byte>(value_.size() - 1); // -1 because the first two bytes are encoded as one
 }
 
 
 SNMPValue::SNMPValue() {
 	set_type(SNMPDataType::Null);
+	value_ = nullptr;
 }
 
 SNMPValue::SNMPValue(SNMPDataType type, SNMPEntity *value) {
@@ -172,28 +174,61 @@ SNMPValue::SNMPValue(SNMPDataType type, SNMPEntity *value) {
 }
 
 SNMPValue::~SNMPValue() {
-
+	if (value_ != nullptr) {
+		delete value_;
+	}
 }
 
 Error SNMPValue::Marshal(std::list<Byte> &to) {
+	to.push_back(type());
+	to.push_back(0);
+
 	return Error::None;
 }
 
 Error SNMPValue::Unmarshal(std::list<Byte> &from) {
+	set_type(static_cast<SNMPDataType>(from.front()));
+
+	switch(type()) {
+		case SNMPDataType::Integer:
+		case SNMPDataType::Counter32:
+		case SNMPDataType::Gauge32:
+		case SNMPDataType::TimeTicks:
+		case SNMPDataType::Counter64: {
+			value_ = new SNMPInteger{};
+		}
+		case SNMPDataType::OctetString: {
+			value_ = new SNMPOctetString{};
+		}
+		case SNMPDataType::ObjectIdentifier: {
+			value_ = new SNMPObjectIdentifier{};
+		}
+		default:
+			return Error::SNMPValueUnrecognized;
+	}
+
+	value_->Unmarshal(from);
+
+
 	return Error::None;
 }
 
 Byte SNMPValue::length() {
-	return 0;
+	if (type() == SNMPDataType::Null) {
+		return kSNMPHeaderSize;
+	}
+	return kSNMPHeaderSize + value_->length();
 }
 
 
 SNMPVarbind::SNMPVarbind() {
-
+	set_type(SNMPDataType::Sequence);
 }
 
 SNMPVarbind::SNMPVarbind(SNMPObjectIdentifier identifier, SNMPValue value) {
-
+	set_type(SNMPDataType::Sequence);
+	identifier_ = identifier;
+	value_ = value;
 }
 
 SNMPVarbind::~SNMPVarbind() {
@@ -201,15 +236,29 @@ SNMPVarbind::~SNMPVarbind() {
 }
 
 Error SNMPVarbind::Marshal(std::list<Byte> &to) {
+	to.push_back(type());
+	to.push_back(identifier_.length() + value_.length());
+	identifier_.Marshal(to);
+	value_.Marshal(to);
+
 	return Error::None;
 }
 
 Error SNMPVarbind::Unmarshal(std::list<Byte> &from) {
+	set_type(static_cast<SNMPDataType>(from.front()));
+	from.pop_front();
+
+	Byte len = from.front();
+	from.pop_front();
+
+	identifier_.Unmarshal(from);
+	value_.Unmarshal(from);
+
 	return Error::None;
 }
 
 Byte SNMPVarbind::length() {
-	return 0;
+	return kSNMPHeaderSize + identifier_.length() + value_.length();
 }
 
 
@@ -233,15 +282,45 @@ bool SNMPVarbindList::Add(SNMPVarbind varbind) {
 }
 
 Error SNMPVarbindList::Marshal(std::list<Byte> &to) {
+	to.push_back(type());
+
+	// get the length of the elements
+	int len = 0;
+	for (auto it = varbinds_.begin(); it != varbinds_.end(); it++) {
+		len += it->length();
+	}
+	to.push_back(len);
+
+	for (auto it = varbinds_.begin(); it != varbinds_.end(); it++) {
+		it->Marshal(to);
+	}
+
 	return Error::None;
 }
 
 Error SNMPVarbindList::Unmarshal(std::list<Byte> &from) {
+	set_type(static_cast<SNMPDataType>(from.front()));
+	from.pop_front();
+
+	Byte length = from.front();
+	from.pop_front();
+
+	// unmarshal bind
+	SNMPVarbind bind{};
+	bind.Unmarshal(from);
+
+	Add(bind);
+
 	return Error::None;
 }
 
 Byte SNMPVarbindList::length() {
-	return 0;
+	Byte length = 0;
+	for (auto it = varbinds_.begin(); it != varbinds_.end(); it++) {
+		length += it->length();
+	}
+
+	return kSNMPHeaderSize + length;
 }
 
 
@@ -261,7 +340,7 @@ SNMPPDU::~SNMPPDU() {
 
 Error SNMPPDU::Marshal(std::list<Byte> &to) {
 	to.push_back(type());
-	to.push_back(length());
+	to.push_back(request_id_.length() + error_.length() + error_index_.length() + varbinds_.length());
 	request_id_.Marshal(to);
 	error_.Marshal(to);
 	error_index_.Marshal(to);
@@ -271,6 +350,17 @@ Error SNMPPDU::Marshal(std::list<Byte> &to) {
 }
 
 Error SNMPPDU::Unmarshal(std::list<Byte> &from) {
+	set_type(static_cast<SNMPDataType>(from.front()));
+	from.pop_front();
+
+	Byte len = from.front();
+	from.pop_front();
+
+	request_id_.Unmarshal(from);
+	error_.Unmarshal(from);
+	error_index_.Unmarshal(from);
+	varbinds_.Unmarshal(from);
+
 	return Error::None;
 }
 
@@ -299,7 +389,7 @@ Error SNMPGetPacket::Marshal(std::list<Byte> &to) {
 	to.clear();
 
 	to.push_back(type()); // type is first
-	to.push_back(length()); // length of the packet is second
+	to.push_back(version_.length() + community_string_.length() + pdu_.length()); // length of the packet is second
 	version_.Marshal(to); // version is third
 	community_string_.Marshal(to); // 4
 	pdu_.Marshal(to); // 5
@@ -308,6 +398,24 @@ Error SNMPGetPacket::Marshal(std::list<Byte> &to) {
 }
 
 Error SNMPGetPacket::Unmarshal(std::list<Byte> &from) {
+	set_type(static_cast<SNMPDataType>(from.front()));
+	from.pop_front();
+
+	Byte length = from.front();
+	from.pop_front();
+
+	Error err{};
+
+	if ((err = version_.Unmarshal(from)) != Error::None) {
+		return err;
+	}
+	if ((err = community_string_.Unmarshal(from)) != Error::None) {
+		return err;
+	}
+	if ((err = pdu_.Unmarshal(from)) != Error::None) {
+		return err;
+	}
+
 	return Error::None;
 }
 

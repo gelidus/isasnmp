@@ -15,15 +15,21 @@ enum class Error {
 		CannotSendData,
 		CannotSendFullData,
 		CannotReceiveData,
+
+		SNMPValueUnrecognized,
 };
 
-enum SNMPDataType : Byte {
+enum SNMPDataType : unsigned char {
 		Integer = 0x02,
 		OctetString = 0x04,
 		Null = 0x05,
 		ObjectIdentifier = 0x06,
 		Sequence = 0x30,
+		IpAddress = 0x40,
+		Counter32 = 0x41,
 		Gauge32 = 0x42,
+		TimeTicks = 0x43,
+		Counter64 = 0x46,
 
 		GetNextRequest = 0xa1,
 		GetResponse = 0xa2,

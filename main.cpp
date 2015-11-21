@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 			SNMPOctetString{"public"},
 			SNMPPDU{
 					SNMPDataType::GetNextRequest,
-					SNMPInteger{1879546}, // request_id TODO: generate
+					SNMPInteger{1859806765}, // request_id TODO: generate
 					SNMPInteger{0}, // error
 					SNMPInteger{0}, // error index
 					SNMPVarbindList{
@@ -23,8 +23,7 @@ int main(int argc, char *argv[]) {
 													list<Byte>{1, 3, 6, 1, 2, 1, 2, 2} // if table object
 											},
 											SNMPValue{
-													SNMPDataType::Null,
-													nullptr
+													SNMPDataType::Null
 											}
 									}
 							}
@@ -37,6 +36,9 @@ int main(int argc, char *argv[]) {
 	for (auto i = to.begin(); i != to.end(); i++) {
 		cout << hex << static_cast<int>(*i) << " ";
 	}
+
+	SNMPGetPacket test{};
+	test.Unmarshal(to);
 
 	return 0;
 

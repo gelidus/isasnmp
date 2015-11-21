@@ -7,7 +7,7 @@ int CalculateLastByteIndex(long long val) {
 
 	// get the first non-null index of the number
 	int i = 7;
-	for (; conv.bytes[i] == 0 && i > 1; i--);
+	for (; conv.bytes[i] == 0 && i > 0; i--);
 
 	return i;
 }

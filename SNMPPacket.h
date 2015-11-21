@@ -29,8 +29,16 @@ public:
 		// entity. This should correspond to T type.
 		SNMPDataType type() { return type_; }
 
-		// length returns total length of the T value. This method
+		// length returns total length of the packet. This method
 		// must be overriden for every typed class
+		// Warning: This method will return full block length,
+		// 		not only the length of the value. Calculate value
+		//		length by substracting kSNMPHeaderSize from the
+		//		length() if you don't want to calculate it manually
+		// Warning: length is stored in SNMP on variadic number of
+		//		bytes. This implementation is using only one. Using
+		//		more than 255B packets will lead to the corrupted
+		//		Entity or may crash
 		virtual Byte length() = 0;
 
 		// Marshal serializes the structure into the given list.
@@ -106,7 +114,7 @@ public:
 
 public:
 		SNMPValue();
-		SNMPValue(SNMPDataType type, SNMPEntity *value);
+		SNMPValue(SNMPDataType type, SNMPEntity *value = nullptr);
 		virtual ~SNMPValue();
 
 		virtual Error Marshal(std::list<Byte> &to) override;
@@ -145,6 +153,10 @@ public:
 		SNMPVarbindList(std::list<SNMPVarbind> varbinds_);
 		virtual ~SNMPVarbindList();
 
+		// Add pushes the given varbind into the current list
+		// of varbinds. It may then be serialized. All varbinds
+		// should be populated into the constructor, this is only
+		// for the purpose of dynamic adding while Unmarshalling
 		bool Add(SNMPVarbind varbind);
 
 		virtual Error Marshal(std::list<Byte> &to) override;
