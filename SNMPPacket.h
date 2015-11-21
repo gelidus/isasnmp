@@ -145,7 +145,7 @@ public:
 		SNMPVarbindList(std::list<SNMPVarbind> varbinds_);
 		virtual ~SNMPVarbindList();
 
-		bool Add(SNMPVarbind *varbind);
+		bool Add(SNMPVarbind varbind);
 
 		virtual Error Marshal(std::list<Byte> &to) override;
 		virtual Error Unmarshal(std::list<Byte> &from) override;

@@ -1,3 +1,4 @@
+#include <iostream>
 #include "types.h"
 
 int CalculateLastByteIndex(long long val) {
@@ -5,8 +6,8 @@ int CalculateLastByteIndex(long long val) {
 	conv.value = val;
 
 	// get the first non-null index of the number
-	int i;
-	for (i = 7; conv.bytes[i] == 0; i--);
+	int i = 7;
+	for (; conv.bytes[i] == 0 && i > 1; i--);
 
 	return i;
 }

@@ -163,11 +163,12 @@ Byte SNMPObjectIdentifier::length() {
 
 
 SNMPValue::SNMPValue() {
-
+	set_type(SNMPDataType::Null);
 }
 
 SNMPValue::SNMPValue(SNMPDataType type, SNMPEntity *value) {
-
+	set_type(type);
+	value_ = value;
 }
 
 SNMPValue::~SNMPValue() {
@@ -213,19 +214,22 @@ Byte SNMPVarbind::length() {
 
 
 SNMPVarbindList::SNMPVarbindList() {
-
+	set_type(SNMPDataType::Sequence);
 }
 
-SNMPVarbindList::SNMPVarbindList(std::list<SNMPVarbind> varbinds_) {
-
+SNMPVarbindList::SNMPVarbindList(std::list<SNMPVarbind> varbinds) {
+	set_type(SNMPDataType::Sequence);
+	varbinds_ = varbinds;
 }
 
 SNMPVarbindList::~SNMPVarbindList() {
 
 }
 
-bool SNMPVarbindList::Add(SNMPVarbind *varbind) {
-	return false;
+bool SNMPVarbindList::Add(SNMPVarbind varbind) {
+	varbinds_.push_back(varbind);
+
+	return true;
 }
 
 Error SNMPVarbindList::Marshal(std::list<Byte> &to) {

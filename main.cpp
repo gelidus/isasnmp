@@ -5,26 +5,7 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-	SNMPObjectIdentifier i{list<Byte>{1,3,1,2,2,1}};
-	list<Byte> to;
-
-	i.Marshal(to);
-
-	for (auto i = to.begin(); i != to.end(); i++) {
-		cout << hex << static_cast<int>(*i) << " ";
-	}
-
-	SNMPObjectIdentifier m{};
-	m.Unmarshal(to);
-
-	cout << endl << endl;
-	m.Marshal(to);
-
-	for (auto i = to.begin(); i != to.end(); i++) {
-		cout << hex << static_cast<int>(*i) << " ";
-	}
-
-	cout << "here";
+	list<Byte> to{};
 
 	SNMPGetPacket ifTablePacket{
 			SNMPDataType::Sequence,
@@ -32,7 +13,7 @@ int main(int argc, char *argv[]) {
 			SNMPOctetString{"public"},
 			SNMPPDU{
 					SNMPDataType::GetNextRequest,
-					SNMPInteger{1}, // request_id
+					SNMPInteger{1879546}, // request_id TODO: generate
 					SNMPInteger{0}, // error
 					SNMPInteger{0}, // error index
 					SNMPVarbindList{
