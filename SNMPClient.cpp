@@ -3,7 +3,7 @@
 //
 
 #include "SNMPClient.h"
-#include <memory>
+#include <memory.h>
 #include <vector>
 
 using namespace std;
@@ -74,11 +74,21 @@ Error SNMPClient::SetupConnection() {
 		return Error::CannotCreateSocket;
 	}
 
-	server_.sin_addr.s_addr = inet_addr(this->address_.c_str());
+	int conversion = inet_aton(this->address_.c_str(), &server_.sin_addr);
+	if (conversion == 0) {
+		// given input could not be translated
+		struct hostent *host;
+		if ((host = gethostbyname(this->address_.c_str())) == NULL) {
+			return Error::CannotTranslateAddress;
+		}
+		memcpy(&server_.sin_addr, host->h_addr_list[0], host->h_length);
+	}
 	server_.sin_family = AF_INET;
 	server_.sin_port = htons(kSNMPPort);
 
 	server_info_length_ = sizeof(server_);
+
+	cout << "Connected to the server" << endl;
 
 	return Error::None;
 }
@@ -96,6 +106,7 @@ Error SNMPClient::SendBytes(vector<Byte> &msg, int length) {
 }
 
 Error SNMPClient::ReceiveBytes(vector<Byte> &to, int length) {
+	cout << "Receiving " << length << endl;
 
 	char *buffer = new char[length];
 
@@ -117,6 +128,8 @@ Error SNMPClient::SendGetPacket(SNMPGetPacket *packet) {
 	if (err != Error::None) {
 		return err;
 	}
+
+	cout << "Sending bytes " << bytes.size() << endl;
 
 	return SendBytes(bytes, static_cast<int>(bytes.size()));
 }
