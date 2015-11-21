@@ -2,6 +2,9 @@
 // Created by Peter on 11/21/2015.
 //
 
+#include <ctime>
+#include <iomanip>
+#include <chrono>
 #include "InterfaceInfoContainer.h"
 
 using namespace std;
@@ -37,10 +40,46 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 	// check if the interface already exists
 	if (interfaces_.count(interface) == 0) {
 		// non existing interface
-		interfaces_[interface] << "time";
+		std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::system_clock::now().time_since_epoch()
+		);
+
+		std::time_t t = std::time(nullptr);
+		interfaces_[interface] << std::put_time(std::localtime(&t), "%Y-%m-%d %H:%M:%S.");
+		interfaces_[interface] << (ms.count() % 1000);
 	} else {
 		// existing interface
-		interfaces_[interface] << ";thing";
+		SNMPEntity *entity = packet->pdu().varbinds().binds().begin()->value().value();
+		interfaces_[interface] << ";";
+		switch (entity->type()) {
+			case SNMPDataType::Integer: {
+				SNMPInteger *integer = (SNMPInteger *) entity;
+				interfaces_[interface] << integer->value();
+				break;
+			}
+			case SNMPDataType::OctetString: {
+				SNMPOctetString *octetString = (SNMPOctetString *) entity;
+				interfaces_[interface] << octetString->value();
+				break;
+			}
+			case SNMPDataType::ObjectIdentifier: {
+				SNMPObjectIdentifier *objectIdentifier = (SNMPObjectIdentifier *) entity;
+				for (auto it = objectIdentifier->value().begin(); it != objectIdentifier->value().end(); it++) {
+					if (it != objectIdentifier->value().begin()) {
+						interfaces_[interface] << ":";
+					}
+					interfaces_[interface] << hex << (int) (*it);
+				}
+
+				interfaces_[interface] << dec; // reset to decimal
+				break;
+			}
+			case SNMPDataType::Null:
+				interfaces_[interface] << "0";
+				break;
+			default:
+				return Error::SNMPValueUnrecognized;
+		}
 	}
 
 	return Error::None;

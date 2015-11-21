@@ -201,6 +201,7 @@ Error SNMPValue::Unmarshal(std::list<Byte> &from) {
 		case SNMPDataType::Gauge32:
 		case SNMPDataType::TimeTicks:
 		case SNMPDataType::Counter64: {
+			set_type(SNMPDataType::Integer); // recast for the further use. This should be redone
 			value_ = new SNMPInteger{};
 		}
 		case SNMPDataType::OctetString: {
