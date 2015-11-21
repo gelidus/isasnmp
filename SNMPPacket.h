@@ -25,6 +25,13 @@ protected:
 		void set_type(SNMPDataType type) { type_ = type; }
 
 public:
+		// ~SNMPEntity is virtual destructor needed for the
+		// upper class destructions. Otherwise, no destructor
+		// above this one will be called, when this class
+		// is inherited. Definition not needed, nothing to
+		// destruct here
+		virtual ~SNMPEntity() {}
+
 		// type will return the type of the value of current snmp
 		// entity. This should correspond to T type.
 		SNMPDataType type() { return type_; }

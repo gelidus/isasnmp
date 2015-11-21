@@ -55,6 +55,8 @@ Error SNMPClient::Run() {
 	};
 
 	SendGetPacket(&ifTablePacket);
+
+	return Error::None;
 }
 
 Error SNMPClient::SetupConnection() {
@@ -77,7 +79,7 @@ Error SNMPClient::SendBytes(list<Byte> &msg, unsigned long long length) {
 	int sent = sendto(socket_, reinterpret_cast<const char*>(msg.front()), static_cast<int>(length), 0, (struct sockaddr*)&server_, sizeof(server_));
 	if (sent == -1) {
 		return Error::CannotSendData;
-	} else if (sent != length) {
+	} else if (sent != static_cast<int>(length)) {
 		return Error::CannotSendFullData;
 	}
 

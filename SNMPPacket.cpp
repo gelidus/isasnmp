@@ -117,7 +117,7 @@ Error SNMPObjectIdentifier::Marshal(std::list<Byte> &to) {
 	to.push_back(static_cast<Byte>(value_.size() - 1));
 
 	auto it = value_.begin();
-	for (int i = 0; i < value_.size(); i++, it++) {
+	for (unsigned int i = 0; i < value_.size(); i++, it++) {
 		if (i == 0) {
 			Byte first = (*it) * static_cast<Byte>(40);
 			Byte second = (*(++it));
@@ -258,7 +258,7 @@ Error SNMPVarbind::Unmarshal(std::list<Byte> &from) {
 	set_type(static_cast<SNMPDataType>(from.front()));
 	from.pop_front();
 
-	Byte len = from.front();
+	//Byte len = from.front();
 	from.pop_front();
 
 	identifier_.Unmarshal(from);
@@ -312,7 +312,7 @@ Error SNMPVarbindList::Unmarshal(std::list<Byte> &from) {
 	set_type(static_cast<SNMPDataType>(from.front()));
 	from.pop_front();
 
-	Byte length = from.front();
+	//Byte length = from.front();
 	from.pop_front();
 
 	// unmarshal bind
@@ -363,7 +363,7 @@ Error SNMPPDU::Unmarshal(std::list<Byte> &from) {
 	set_type(static_cast<SNMPDataType>(from.front()));
 	from.pop_front();
 
-	Byte len = from.front();
+	//Byte len = from.front();
 	from.pop_front();
 
 	request_id_.Unmarshal(from);
@@ -411,7 +411,7 @@ Error SNMPGetPacket::Unmarshal(std::list<Byte> &from) {
 	set_type(static_cast<SNMPDataType>(from.front()));
 	from.pop_front();
 
-	Byte length = from.front();
+	//Byte length = from.front();
 	from.pop_front();
 
 	Error err{};
