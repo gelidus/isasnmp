@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include <vector>
-#include "SNMPPacket.h"
+#include "InterfaceInfoContainer.h"
 
 #ifdef __unix__
 #include <sys/socket.h>
@@ -26,6 +26,10 @@ const int kSNMPPort = 161;
 
 class SNMPClient {
 private:
+		// interface_container handles all information that
+		// we have about interfaces
+		InterfaceInfoContainer interface_container_;
+
 		// global client settings
 		std::string address_;
 		std::string community_;

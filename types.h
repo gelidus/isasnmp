@@ -18,6 +18,7 @@ enum class Error {
 		CannotReceiveData,
 
 		SNMPValueUnrecognized,
+		SNMPNotAnInterface,
 };
 
 enum SNMPDataType : unsigned char {

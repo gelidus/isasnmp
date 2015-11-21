@@ -28,37 +28,31 @@ Error SNMPClient::Run() {
 		return err;
 	}
 
-	// first packet for the interface table
-	SNMPGetPacket *ifTablePacket = CreateGetPacket(SNMPObjectIdentifier{
-			list<Byte>{1, 3, 6, 1, 2, 1, 2, 2}
-	});
+	list<Byte> oid{1, 3, 6, 1, 2, 1, 2, 2};
 
-	err = SendGetPacket(ifTablePacket);
-	if (err != Error::None) {
-		return err;
+	do {
+		SNMPGetPacket *nextRequest = CreateGetPacket(SNMPObjectIdentifier{oid});
+		err = SendGetPacket(nextRequest);
+		delete nextRequest; // delete packet as we dont need it
+
+		if (err != Error::None) {
+			return err;
+		}
+
+		SNMPGetPacket response{};
+		err = ReceiveGetPacket(&response);
+		if (err != Error::None) {
+			return err;
+		}
+
+		err = interface_container_.ProcessPacket(&response);
+	} while (err == Error::None);
+
+	if (err == Error::SNMPNotAnInterface) {
+		return Error::None; // NotAnInterface is wanted status
+	} else {
+		return err; // else we should return the correct error
 	}
-
-	SNMPGetPacket response{};
-	err = ReceiveGetPacket(&response);
-	if (err != Error::None) {
-		return err;
-	}
-
-	SNMPGetPacket *nextRequest = CreateGetPacket(SNMPObjectIdentifier{
-			response.pdu().varbinds().binds().begin()->identifier().value()
-	});
-	SendGetPacket(nextRequest);
-
-	cout << "id: " << response.pdu().request_id().value() << endl;
-	cout << "oids: " << response.pdu().varbinds().binds().size() << endl;
-	cout << "oid: " << endl;
-	auto oidlist = response.pdu().varbinds().binds().begin()->identifier().value();
-	for (auto b = oidlist.begin(); b != oidlist.end(); b++) {
-		cout << hex << (int)(*b) << " ";
-	}
-	cout << endl;
-
-	return Error::None;
 }
 
 Error SNMPClient::SetupConnection() {
