@@ -56,6 +56,9 @@ Error SNMPClient::Run() {
 
 	SendGetPacket(&ifTablePacket);
 
+	SNMPGetPacket response{};
+	ReceiveGetPacket(&response);
+
 	return Error::None;
 }
 
@@ -109,7 +112,7 @@ Error SNMPClient::SendGetPacket(SNMPGetPacket *packet) {
 		return err;
 	}
 
-	return SendBytes(bytes, bytes.size());
+	return SendBytes(bytes, static_cast<int>(bytes.size()));
 }
 
 Error SNMPClient::ReceiveGetPacket(SNMPGetPacket *packet) {
