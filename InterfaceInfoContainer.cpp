@@ -4,6 +4,8 @@
 
 #include "InterfaceInfoContainer.h"
 
+using namespace std;
+
 InterfaceInfoContainer::InterfaceInfoContainer() {
 	i = 0;
 }
@@ -13,6 +15,7 @@ InterfaceInfoContainer::~InterfaceInfoContainer() {
 }
 
 Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
+	cout << "Got packet id: " << packet->pdu().request_id().value() << endl;
 	i++;
 
 	if (i > 5) {
