@@ -161,7 +161,7 @@ SNMPGetPacket *SNMPClient::CreateGetPacket(SNMPObjectIdentifier oid) {
 			SNMPOctetString{community_},
 			SNMPPDU{
 					SNMPDataType::GetNextRequest,
-					SNMPInteger{1}, // request_id
+					SNMPInteger{GenerateRequestID()}, // request_id
 					SNMPInteger{0}, // error
 					SNMPInteger{0}, // error index
 					SNMPVarbindList{
