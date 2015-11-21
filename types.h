@@ -21,10 +21,13 @@ enum SNMPDataType : Byte {
 		Integer = 0x02,
 		OctetString = 0x04,
 		Null = 0x05,
+		ObjectIdentifier = 0x06,
 		Sequence = 0x30,
+		Gauge32 = 0x42,
 
 		GetNextRequest = 0xa1,
-		GetResponse = 0xa2
+		GetResponse = 0xa2,
+		Trap = 0xa4,
 };
 
 union ByteLongLong {

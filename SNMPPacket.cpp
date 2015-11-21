@@ -101,27 +101,64 @@ Byte SNMPOctetString::length() {
 
 
 SNMPObjectIdentifier::SNMPObjectIdentifier() {
-
+	set_type(SNMPDataType::ObjectIdentifier);
 }
 
 SNMPObjectIdentifier::SNMPObjectIdentifier(std::list<Byte> value) {
-
+	set_type(SNMPDataType::ObjectIdentifier);
+	value_ = value;
 }
 
-SNMPObjectIdentifier::~SNMPObjectIdentifier() {
-
-}
+SNMPObjectIdentifier::~SNMPObjectIdentifier() {}
 
 Error SNMPObjectIdentifier::Marshal(std::list<Byte> &to) {
+	to.push_back(type());
+	to.push_back(length());
+
+	auto it = value_.begin();
+	for (int i = 0; i < value_.size(); i++, it++) {
+		if (i == 0) {
+			Byte first = (*it) * static_cast<Byte>(40);
+			Byte second = (*(++it));
+
+			// push the first byte
+			to.push_back(first + second);
+
+			i++; // skip the second element
+			continue;
+		}
+
+		// push the remaining bytes
+		to.push_back(*it);
+	}
+
 	return Error::None;
 }
 
 Error SNMPObjectIdentifier::Unmarshal(std::list<Byte> &from) {
+	set_type(static_cast<SNMPDataType>(from.front()));
+	from.pop_front();
+
+	Byte length = from.front();
+	from.pop_front();
+
+	Byte first = from.front();
+	from.pop_front();
+
+	value_.push_back(first / static_cast<Byte>(40));
+	value_.push_back(first % static_cast<Byte>(40));
+
+	// retrieve remaining bytes
+	for (int i = 1; i < length; i++) {
+		value_.push_back(from.front());
+		from.pop_front();
+	}
+
 	return Error::None;
 }
 
 Byte SNMPObjectIdentifier::length() {
-	return 0;
+	return value_.size() - 1; // -1 because the first two bytes are encoded as one
 }
 
 

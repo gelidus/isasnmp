@@ -5,7 +5,7 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-	SNMPOctetString i{"Hello World"};
+	SNMPObjectIdentifier i{list<Byte>{1,3,1,2,2,1}};
 	list<Byte> to;
 
 	i.Marshal(to);
@@ -14,8 +14,15 @@ int main(int argc, char *argv[]) {
 		cout << hex << static_cast<int>(*i) << " ";
 	}
 
-	SNMPOctetString m{};
+	SNMPObjectIdentifier m{};
 	m.Unmarshal(to);
+
+	cout << endl << endl;
+	m.Marshal(to);
+
+	for (auto i = to.begin(); i != to.end(); i++) {
+		cout << hex << static_cast<int>(*i) << " ";
+	}
 
 	cout << "here";
 
