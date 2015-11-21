@@ -61,16 +61,19 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 		interfaces_[interface] << ";";
 		switch (entity->type()) {
 			case SNMPDataType::Integer: {
+				cout << "Ingeter" << endl;
 				SNMPInteger *integer = (SNMPInteger *) entity;
 				interfaces_[interface] << integer->value();
 				break;
 			}
 			case SNMPDataType::OctetString: {
+				cout << "Octet string" << endl;
 				SNMPOctetString *octetString = (SNMPOctetString *) entity;
 				interfaces_[interface] << octetString->value();
 				break;
 			}
 			case SNMPDataType::ObjectIdentifier: {
+				cout << "oid" << endl;
 				SNMPObjectIdentifier *objectIdentifier = (SNMPObjectIdentifier *) entity;
 				for (auto it = objectIdentifier->value().begin(); it != objectIdentifier->value().end(); it++) {
 					if (it != objectIdentifier->value().begin()) {
