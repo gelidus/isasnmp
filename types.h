@@ -11,6 +11,7 @@ const Byte kSNMPHeaderSize = 2;
 
 enum class Error {
 		None,
+		CannotTranslateAddress,
 		CannotCreateSocket,
 		CannotSendData,
 		CannotSendFullData,
