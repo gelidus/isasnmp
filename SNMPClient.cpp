@@ -12,10 +12,6 @@ SNMPClient::SNMPClient(std::string address, std::string community, int interval)
 	address_ = address;
 	community_ = community;
 	interval_ = interval;
-
-#ifndef __unix__
-	dont_block_ = 1;
-#endif
 }
 
 SNMPClient::~SNMPClient() {
@@ -59,10 +55,6 @@ Error SNMPClient::Run() {
 	};
 
 	SendGetPacket(&ifTablePacket);
-
-	for (;;) {
-
-	}
 }
 
 Error SNMPClient::SetupConnection() {
@@ -76,13 +68,6 @@ Error SNMPClient::SetupConnection() {
 	server_.sin_port = htons(kSNMPPort);
 
 	server_info_length_ = sizeof(server_);
-
-#ifdef __unix__
-	int flags = fcntl(socket_, F_GETFL, 0);
-  fcntl(socket_, F_SETFL, flags | O_NONBLOCK);
-#else
-	ioctlsocket(socket_, FIONBIO, &dont_block_);
-#endif
 
 	return Error::None;
 }

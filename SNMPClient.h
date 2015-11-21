@@ -35,11 +35,10 @@ private:
 		struct sockaddr_in server_;
 #ifdef __unix__
 		int socket_;
-		socketlen_t server_info_length;
+		socketlen_t server_info_length_;
 #else
 		SOCKET socket_;
 		int server_info_length_;
-		unsigned long dont_block_ = 1;
 #endif
 
 public:
