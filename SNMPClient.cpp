@@ -110,8 +110,6 @@ Error SNMPClient::SendBytes(vector<Byte> &msg, int length) {
 }
 
 Error SNMPClient::ReceiveBytes(vector<Byte> &to, int length) {
-	cout << "Receiving " << length << endl;
-
 	char *buffer = new char[length];
 
 	int recvd = recvfrom(socket_, buffer, length, 0, (struct sockaddr*)&server_, &server_info_length_);
@@ -119,7 +117,8 @@ Error SNMPClient::ReceiveBytes(vector<Byte> &to, int length) {
 		return Error::CannotReceiveData;
 	}
 
-	std::copy(buffer, buffer + length, std::back_inserter(to));
+	to.insert(to.end(), &buffer[0], &buffer[recvd]);
+	delete buffer;
 
 	return Error::None;
 }
@@ -140,14 +139,11 @@ Error SNMPClient::SendGetPacket(SNMPGetPacket *packet) {
 
 Error SNMPClient::ReceiveGetPacket(SNMPGetPacket *packet) {
 
-	// receive first 2 bytes from the client
-	// to get packet type and total upcoming length
+	// we must receive the whole message from the
+	// socket. Other than that, the message remaining
+	// will be discarded
 	vector<Byte> bytes{};
-	ReceiveBytes(bytes, 2);
-
-	// receive the rest bytes of the packet
-	// based on the second byte (length)
-	ReceiveBytes(bytes, bytes[1]);
+	ReceiveBytes(bytes, 1024);
 
 	// create list for the unmarshal
 	std::list<Byte> byte_list{};
