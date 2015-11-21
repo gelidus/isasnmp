@@ -27,6 +27,8 @@ SNMPClient::~SNMPClient() {
 Error SNMPClient::Run() {
 	RetrieveInformation();
 
+	interface_container_.OutputResults();
+
 	return Error::None;
 }
 
@@ -92,8 +94,6 @@ Error SNMPClient::SetupConnection() {
 
 	server_info_length_ = sizeof(server_);
 
-	cout << "Connected to the server" << endl;
-
 	return Error::None;
 }
 
@@ -131,8 +131,6 @@ Error SNMPClient::SendGetPacket(SNMPGetPacket *packet) {
 	if (err != Error::None) {
 		return err;
 	}
-
-	cout << "Sending bytes " << bytes.size() << endl;
 
 	return SendBytes(bytes);
 }
