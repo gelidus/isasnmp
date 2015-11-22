@@ -36,9 +36,8 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 	// retrieve the interface from the oid
 	Byte interface = oid.back();
 
-	// check if the interface already exists
-	if (interfaces_.count(interface) == 0) {
-		// non existing interface
+	// check if this is the start of the time mark
+	if (interfaces_.size() == 0) {
 		std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(
 				std::chrono::system_clock::now().time_since_epoch()
 		);
@@ -53,8 +52,7 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 
 		strftime(buffer, 100, "%Y-%m-%d %H:%M:%S.", time_info);
 
-		interfaces_[interface] << buffer << (ms.count() % 1000);
-
+		time_mark_ +=  buffer + (ms.count() % 1000);
 	}
 
 	SNMPValue *entity = packet->pdu().varbinds().binds().begin()->value();
@@ -93,7 +91,9 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 }
 
 void InterfaceInfoContainer::OutputResults() {
+	cout << time_mark_;
 	for (const auto &pair : interfaces_) {
-		cout << pair.second.str() << endl;
+		cout << pair.second.str();
 	}
+	cout << endl;
 }
