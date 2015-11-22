@@ -63,6 +63,8 @@ public:
 		// Run will start the connection to the
 		Error Run();
 
+		void Stop() { run_ = false; }
+
 		Error RetrieveInformation();
 
 		InterfaceInfoContainer& interface_container() { return interface_container_; }

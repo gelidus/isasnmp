@@ -5,6 +5,7 @@
 #include "SNMPClient.h"
 #include <memory.h>
 #include <vector>
+#include <thread>
 
 using namespace std;
 
@@ -33,13 +34,7 @@ Error SNMPClient::Run() {
 
 		interface_container_.OutputResults(); // print results of the container
 
-		struct timespec req{0};
-		time_t sec = (int)(interval_ / 1000);
-		int nsec = interval_ - (sec * 1000);
-		req.tv_sec = sec;
-		req.tv_nsec = nsec * 1000000L;
-		while(nanosleep(&req, &req) == -1)
-			continue;
+		std::this_thread::sleep_for(std::chrono::milliseconds(interval_));
 	}
 	return Error::None;
 }
