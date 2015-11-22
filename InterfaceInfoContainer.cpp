@@ -38,6 +38,7 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 
 	// check if this is the start of the time mark
 	if (interfaces_.size() == 0) {
+		time_mark_ = "";
 		std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(
 				std::chrono::system_clock::now().time_since_epoch()
 		);
