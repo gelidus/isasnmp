@@ -30,6 +30,11 @@ private:
 		// we have about interfaces
 		InterfaceInfoContainer interface_container_;
 
+		// run is indicating if the interval should run
+		// or the applciation should shutdown after the
+		// upcoming print
+		bool run_;
+
 		// last_request_id_ is generator helper variable
 		// that is incremented each time the generator is
 		// called. This should not be manually incremented

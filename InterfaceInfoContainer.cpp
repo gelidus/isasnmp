@@ -15,6 +15,10 @@ InterfaceInfoContainer::~InterfaceInfoContainer() {
 
 }
 
+void InterfaceInfoContainer::Reset() {
+	interfaces_.clear(); // clear the map
+}
+
 Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 	// checking for valid oid
 	list<Byte> oid = packet->pdu().varbinds().binds().begin()->identifier().value();
@@ -52,8 +56,9 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 		time_info = localtime(&raw_time);
 
 		strftime(buffer, 100, "%Y-%m-%d %H:%M:%S.", time_info);
-
-		time_mark_ +=  buffer + (ms.count() % 1000);
+		std::stringstream ss;
+		ss << buffer << (ms.count() % 1000);
+		time_mark_ = ss.str();
 	}
 
 	SNMPValue *entity = packet->pdu().varbinds().binds().begin()->value();

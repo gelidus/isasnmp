@@ -22,6 +22,8 @@ public:
 		InterfaceInfoContainer();
 		virtual ~InterfaceInfoContainer();
 
+		void Reset();
+
 		Error ProcessPacket(SNMPGetPacket *packet);
 
 		void OutputResults();

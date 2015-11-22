@@ -12,6 +12,7 @@ SNMPClient::SNMPClient(std::string address, std::string community, int interval)
 	address_ = address;
 	community_ = community;
 	interval_ = interval;
+	run_ = true;
 
 	last_request_id_ = 1;
 }
@@ -25,10 +26,21 @@ SNMPClient::~SNMPClient() {
 }
 
 Error SNMPClient::Run() {
-	RetrieveInformation();
+	
+	while (run_) {
+		interface_container_.Reset(); // reset the container
+		RetrieveInformation(); // populate container
 
-	interface_container_.OutputResults();
+		interface_container_.OutputResults(); // print results of the container
 
+		struct timespec req{0};
+		time_t sec = (int)(interval_ / 1000);
+		int nsec = interval_ - (sec * 1000);
+		req.tv_sec = sec;
+		req.tv_nsec = nsec * 1000000L;
+		while(nanosleep(&req, &req) == -1)
+			continue;
+	}
 	return Error::None;
 }
 

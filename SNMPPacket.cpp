@@ -68,7 +68,6 @@ SNMPOctetString::SNMPOctetString(std::string value) {
 }
 
 SNMPOctetString::~SNMPOctetString() {
-	std::cout << "destructing" << std::endl;
 }
 
 Error SNMPOctetString::Marshal(std::vector<Byte> &to) {
