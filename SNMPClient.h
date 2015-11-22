@@ -35,6 +35,9 @@ private:
 		// upcoming print
 		bool run_;
 
+		// indicates if the request loop is running
+		bool running_;
+
 		// last_request_id_ is generator helper variable
 		// that is incremented each time the generator is
 		// called. This should not be manually incremented
@@ -64,6 +67,8 @@ public:
 		Error Run();
 
 		void Stop() { run_ = false; }
+
+		bool running() { return running_; }
 
 		Error RetrieveInformation();
 

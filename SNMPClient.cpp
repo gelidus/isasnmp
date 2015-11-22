@@ -26,16 +26,27 @@ SNMPClient::~SNMPClient() {
 #endif
 }
 
+typedef chrono::high_resolution_clock Clock;
 Error SNMPClient::Run() {
 	
+	running_ = true;
 	while (run_) {
 		interface_container_.Reset(); // reset the container
+		
+		Clock::time_point start = Clock::now();
 		RetrieveInformation(); // populate container
-
+		Clock::time_point end = Clock::now();
+		chrono::milliseconds diff = chrono::duration_cast<chrono::milliseconds>(end - start);
+		
 		interface_container_.OutputResults(); // print results of the container
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(interval_));
+		if (diff.count() > interval_) {
+			cerr << "Requesting of interfaces information took longer than interval" << endl;
+		} else {
+			std::this_thread::sleep_for(std::chrono::milliseconds(interval_ - diff.count()));
+		}
 	}
+
+	running_ = false;
 	return Error::None;
 }
 
@@ -77,6 +88,7 @@ Error SNMPClient::RetrieveInformation() {
 Error SNMPClient::SetupConnection() {
 	// create datagram socket
 	if ((socket_ = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+		cerr << "Socket could not be create" << endl;
 		return Error::CannotCreateSocket;
 	}
 
@@ -88,6 +100,7 @@ Error SNMPClient::SetupConnection() {
 		// given input could not be translated
 		struct hostent *host;
 		if ((host = gethostbyname(this->address_.c_str())) == NULL) {
+			cerr << "Address could not be translated" << endl;
 			return Error::CannotTranslateAddress;
 		}
 		memcpy(&server_.sin_addr, host->h_addr_list[0], host->h_length);

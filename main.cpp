@@ -1,6 +1,8 @@
 #include <iostream>
 #include <getopt.h>
 #include "SNMPClient.h"
+#include <chrono>
+#include <thread>
 
 #ifdef __unix__
 #include <signal.h>
@@ -13,7 +15,6 @@ SNMPClient *client = nullptr;
 void signal_int(int sig) {
 	if (client != nullptr) {
 		client->Stop();
-		delete client;
 	}
 }
 
@@ -53,5 +54,13 @@ int main(int argc, char *argv[]) {
 	// create client and run it
 	client = new SNMPClient{agent, community_string, interval};
 
-	return static_cast<int>(client->Run());
+	int ret = static_cast<int>(client->Run());
+
+	while (client->running()) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	}
+
+	delete client;
+
+	return ret;
 }
