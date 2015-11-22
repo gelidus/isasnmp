@@ -71,7 +71,7 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 			break;
 		}
 		case SNMPDataType::ObjectIdentifier: {
-			SNMPObjectIdentifier *objectIdentifier = (SNMPObjectIdentifier *) entity;
+			/*SNMPObjectIdentifier *objectIdentifier = (SNMPObjectIdentifier *) entity;
 			for (auto it = objectIdentifier->value().begin(); it != objectIdentifier->value().end(); it++) {
 				if (it != objectIdentifier->value().begin()) {
 					interfaces_[interface] << ":";
@@ -79,7 +79,7 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 				interfaces_[interface] << hex << (int) (*it);
 			}
 
-			interfaces_[interface] << dec; // reset to decimal
+			interfaces_[interface] << dec; // reset to decimal*/
 			break;
 		}
 		case SNMPDataType::Null:

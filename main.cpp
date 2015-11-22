@@ -7,55 +7,6 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-	/*list<Byte> to{};
-	vector<Byte> tt{};
-
-	SNMPInteger *integer = new SNMPInteger{10};
-
-	SNMPGetPacket ifTablePacket{
-			SNMPDataType::Sequence,
-			SNMPInteger{kSNMPVersion},
-			SNMPOctetString{"public"},
-			SNMPPDU{
-					SNMPDataType::GetNextRequest,
-					SNMPInteger{1859806765}, // request_id TODO: generate
-					SNMPInteger{0}, // error
-					SNMPInteger{0}, // error index
-					SNMPVarbindList{
-							list<SNMPVarbind>{
-									SNMPVarbind{ // add varbind for the object of iftable
-											SNMPObjectIdentifier{
-													list<Byte>{1, 3, 6, 1, 2, 1, 2, 2} // if table object
-											},
-											new SNMPValue{
-													SNMPDataType::OctetString,
-													new SNMPOctetString{"Hello"}
-											}
-									}
-							}
-					}
-			}
-	};
-
-	ifTablePacket.Marshal(tt);
-
-	for (auto i = tt.begin(); i != tt.end(); i++) {
-		cout << hex << static_cast<int>(*i) << " ";
-	}
-
-	SNMPGetPacket test{};
-	std::copy(tt.begin(), tt.end(), std::back_inserter(to));
-	test.Unmarshal(to);
-
-	test.Marshal(tt);
-
-	cout << endl << endl;
-
-	for (auto i = tt.begin(); i != tt.end(); i++) {
-		cout << hex << static_cast<int>(*i) << " ";
-	}
-
-	return 0;*/
 
 	int flag; // input flags are: -i interval, -c community_string
 	opterr = 0; // clear error flag
