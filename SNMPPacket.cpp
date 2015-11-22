@@ -186,8 +186,13 @@ Error SNMPValue::Marshal(std::vector
 														 <Byte> &to) {
 	// TODO: SNMPValue marshalling should be able to
 	// marhsall all the stuff, but we dont need it now
-	to.push_back(type());
-	to.push_back(0);
+
+	if (value_ != nullptr) {
+		value_->Marshal(to);
+	} else {
+		to.push_back(type());
+		to.push_back(0);
+	}
 
 	return Error::None;
 }
@@ -203,12 +208,15 @@ Error SNMPValue::Unmarshal(std::list<Byte> &from) {
 		case SNMPDataType::Counter64: {
 			set_type(SNMPDataType::Integer); // recast for the further use. This should be redone
 			value_ = new SNMPInteger{};
+			break;
 		}
 		case SNMPDataType::OctetString: {
 			value_ = new SNMPOctetString{};
+			break;
 		}
 		case SNMPDataType::ObjectIdentifier: {
 			value_ = new SNMPObjectIdentifier{};
+			break;
 		}
 		case SNMPDataType::Null: {
 			// pop both, type and length, as nothing can
@@ -216,6 +224,7 @@ Error SNMPValue::Unmarshal(std::list<Byte> &from) {
 			from.pop_front();
 			from.pop_front();
 			value_ = nullptr;
+			break;
 		}
 		default:
 			return Error::SNMPValueUnrecognized;
@@ -240,7 +249,7 @@ SNMPVarbind::SNMPVarbind() {
 	set_type(SNMPDataType::Sequence);
 }
 
-SNMPVarbind::SNMPVarbind(SNMPObjectIdentifier identifier, SNMPValue value) {
+SNMPVarbind::SNMPVarbind(SNMPObjectIdentifier identifier, SNMPValue *value) {
 	set_type(SNMPDataType::Sequence);
 	identifier_ = identifier;
 	value_ = value;
@@ -253,9 +262,9 @@ SNMPVarbind::~SNMPVarbind() {
 Error SNMPVarbind::Marshal(std::vector
 															 <Byte> &to) {
 	to.push_back(type());
-	to.push_back(identifier_.length() + value_.length());
+	to.push_back(identifier_.length() + value_->length());
 	identifier_.Marshal(to);
-	value_.Marshal(to);
+	value_->Marshal(to);
 
 	return Error::None;
 }
@@ -268,13 +277,13 @@ Error SNMPVarbind::Unmarshal(std::list<Byte> &from) {
 	from.pop_front();
 
 	identifier_.Unmarshal(from);
-	value_.Unmarshal(from);
+	value_->Unmarshal(from);
 
 	return Error::None;
 }
 
 Byte SNMPVarbind::length() {
-	return kSNMPHeaderSize + identifier_.length() + value_.length();
+	return kSNMPHeaderSize + identifier_.length() + value_->length();
 }
 
 

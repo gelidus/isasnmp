@@ -57,30 +57,29 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 		interfaces_[interface] << (ms.count() % 1000);
 	}
 
-	SNMPValue entity = packet->pdu().varbinds().binds().begin()->value();
+	SNMPValue *entity = packet->pdu().varbinds().binds().begin()->value();
 	interfaces_[interface] << ";";
-	switch (entity.type()) {
+	switch (entity->type()) {
 		case SNMPDataType::Integer: {
-			//SNMPInteger *integer = (SNMPInteger *) entity.value();
-			cout << "Ingeter" << endl;
-			//interfaces_[interface] << integer->value();
+			SNMPInteger *integer = (SNMPInteger *) entity->value();
+			interfaces_[interface] << integer->value();
 			break;
 		}
 		case SNMPDataType::OctetString: {
-			//SNMPOctetString *octetString = (SNMPOctetString *) entity;
-			//interfaces_[interface] << octetString->value();
+			SNMPOctetString *octetString = (SNMPOctetString *) entity;
+			interfaces_[interface] << octetString->value();
 			break;
 		}
 		case SNMPDataType::ObjectIdentifier: {
-			//SNMPObjectIdentifier *objectIdentifier = (SNMPObjectIdentifier *) entity;
-			/*for (auto it = objectIdentifier->value().begin(); it != objectIdentifier->value().end(); it++) {
+			SNMPObjectIdentifier *objectIdentifier = (SNMPObjectIdentifier *) entity;
+			for (auto it = objectIdentifier->value().begin(); it != objectIdentifier->value().end(); it++) {
 				if (it != objectIdentifier->value().begin()) {
 					interfaces_[interface] << ":";
 				}
 				interfaces_[interface] << hex << (int) (*it);
 			}
 
-			interfaces_[interface] << dec; // reset to decimal*/
+			interfaces_[interface] << dec; // reset to decimal
 			break;
 		}
 		case SNMPDataType::Null:

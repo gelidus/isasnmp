@@ -166,10 +166,7 @@ SNMPGetPacket *SNMPClient::CreateGetPacket(SNMPObjectIdentifier oid) {
 							list<SNMPVarbind>{
 									SNMPVarbind{ // add varbind for the object of iftable
 											oid,
-											//SNMPObjectIdentifier{
-											//		list<Byte>{1, 3, 6, 1, 2, 1, 2, 2} // if table object
-											//},
-											SNMPValue{
+											new SNMPValue{
 													SNMPDataType::Null,
 													nullptr
 											}

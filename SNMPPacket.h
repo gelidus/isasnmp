@@ -144,11 +144,11 @@ public:
 class SNMPVarbind : public SNMPEntity {
 private:
 		SNMPObjectIdentifier identifier_;
-		SNMPValue value_;
+		SNMPValue *value_;
 
 public:
 		SNMPVarbind();
-		SNMPVarbind(SNMPObjectIdentifier identifier, SNMPValue value);
+		SNMPVarbind(SNMPObjectIdentifier identifier, SNMPValue *value);
 		virtual ~SNMPVarbind();
 
 		virtual Error Marshal(std::vector<Byte> &to) override;
@@ -157,7 +157,7 @@ public:
 		virtual Byte length();
 
 		SNMPObjectIdentifier& identifier() { return identifier_; }
-		SNMPValue value() { return value_; }
+		SNMPValue *value() { return value_; }
 };
 
 // SNMPVarbindList encapsulates the varbins in the
