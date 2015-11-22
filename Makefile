@@ -9,3 +9,6 @@ all: $(SOURCES) $(EXECUTABLE)
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(CFLAGS) $(OBJECTS) -o $@
 
+pack:
+	tar cf xmalin26.tar *
+
