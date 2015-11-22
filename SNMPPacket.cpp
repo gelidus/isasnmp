@@ -247,6 +247,7 @@ Byte SNMPValue::length() {
 
 SNMPVarbind::SNMPVarbind() {
 	set_type(SNMPDataType::Sequence);
+	value_ = new SNMPValue{};
 }
 
 SNMPVarbind::SNMPVarbind(SNMPObjectIdentifier identifier, SNMPValue *value) {
