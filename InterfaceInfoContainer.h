@@ -15,7 +15,7 @@ const int kSNMPEntryInterfaceIndex = 10;
 
 class InterfaceInfoContainer {
 private:
-		std::map<Byte, std::string> interfaces_;
+		std::map<Byte, std::stringstream> interfaces_;
 
 public:
 		InterfaceInfoContainer();

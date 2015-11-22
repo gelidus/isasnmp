@@ -67,7 +67,9 @@ SNMPOctetString::SNMPOctetString(std::string value) {
 	set_type(SNMPDataType::OctetString);
 }
 
-SNMPOctetString::~SNMPOctetString() {}
+SNMPOctetString::~SNMPOctetString() {
+	std::cout << "destructing" << std::endl;
+}
 
 Error SNMPOctetString::Marshal(std::vector<Byte> &to) {
 	to.push_back(type());

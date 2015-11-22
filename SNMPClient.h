@@ -60,6 +60,8 @@ public:
 
 		Error RetrieveInformation();
 
+		InterfaceInfoContainer& interface_container() { return interface_container_; }
+
 private:
 		// SetupConnection creates the socket that will be used
 		// for the communication with the SNMP agent. The connection

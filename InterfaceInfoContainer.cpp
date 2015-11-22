@@ -52,33 +52,26 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 		time_info = localtime(&raw_time);
 
 		strftime(buffer, 100, "%Y-%m-%d %H:%M:%S.", time_info);
-		
-		interfaces_[interface] = "";
-		interfaces_[interface] += buffer;
 
-		stringstream ss;
-		ss << (ms.count() % 1000);
+		interfaces_[interface] << buffer << (ms.count() % 1000);
 
-		interfaces_[interface] += ss.str();
 	}
 
 	SNMPValue *entity = packet->pdu().varbinds().binds().begin()->value();
-	interfaces_[interface] += ";";
+	interfaces_[interface] << ";";
 	switch (entity->type()) {
 		case SNMPDataType::Integer: {
 			SNMPInteger *integer = (SNMPInteger *) entity->value();
-			stringstream ss;
-			ss << integer->value();
-			interfaces_[interface] += ss.str();
+			interfaces_[interface] << integer->value();
 			break;
 		}
 		case SNMPDataType::OctetString: {
-			SNMPOctetString *octetString = reinterpret_cast<SNMPOctetString *>(entity);
-			interfaces_[interface].insert(interfaces_[interface].length(), octetString->value().c_str(), octetString->length() - 2);
+			SNMPOctetString *octetString = reinterpret_cast<SNMPOctetString *>(entity->value());
+			interfaces_[interface] << octetString->value();
 			break;
 		}
 		case SNMPDataType::ObjectIdentifier: {
-			/*SNMPObjectIdentifier *objectIdentifier = (SNMPObjectIdentifier *) entity;
+			SNMPObjectIdentifier *objectIdentifier = reinterpret_cast<SNMPObjectIdentifier*>(entity->value());
 			for (auto it = objectIdentifier->value().begin(); it != objectIdentifier->value().end(); it++) {
 				if (it != objectIdentifier->value().begin()) {
 					interfaces_[interface] << ":";
@@ -86,11 +79,11 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 				interfaces_[interface] << hex << (int) (*it);
 			}
 
-			interfaces_[interface] << dec; // reset to decimal*/
+			interfaces_[interface] << dec; // reset to decimal
 			break;
 		}
 		case SNMPDataType::Null:
-			interfaces_[interface] += "0";
+			interfaces_[interface] << "0";
 			break;
 		default:
 			return Error::SNMPValueUnrecognized;
@@ -101,6 +94,6 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 
 void InterfaceInfoContainer::OutputResults() {
 	for (const auto &pair : interfaces_) {
-		cout << pair.second << endl;
+		cout << pair.second.str() << endl;
 	}
 }

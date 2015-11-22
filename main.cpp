@@ -40,5 +40,32 @@ int main(int argc, char *argv[]) {
 	// create client and run it
 	SNMPClient client{agent, community_string, interval};
 
+	/*
+	SNMPGetPacket packet{
+			SNMPDataType::Sequence,
+			SNMPInteger{kSNMPVersion},
+			SNMPOctetString{"public"},
+			SNMPPDU{
+					SNMPDataType::GetNextRequest,
+					SNMPInteger{1}, // request_id
+					SNMPInteger{0}, // error
+					SNMPInteger{0}, // error index
+					SNMPVarbindList{
+							list<SNMPVarbind>{
+									SNMPVarbind{ // add varbind for the object of iftable
+											std::list<Byte>{1,3,6,1,2,1,2,2,1,1,2},
+											new SNMPValue{
+													SNMPDataType::OctetString,
+													new SNMPOctetString{"hello world"}
+											}
+									}
+							}
+					}
+			}
+	};
+
+	client.interface_container().ProcessPacket(&packet);
+	return 0;*/
+
 	return static_cast<int>(client.Run());
 }
