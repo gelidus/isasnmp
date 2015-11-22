@@ -97,7 +97,7 @@ public:
 
 		virtual Byte length();
 
-		std::string& value() { return value_; }
+		std::string value() { return value_; }
 };
 
 // SNMPObjectIdentifier implements the SNMPEntity interface

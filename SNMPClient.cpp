@@ -65,9 +65,6 @@ Error SNMPClient::RetrieveInformation() {
 	} else {
 		return err; // else we should return the correct error
 	}
-
-	interface_container_.OutputResults();
-	return Error::None;
 }
 
 Error SNMPClient::SetupConnection() {

@@ -52,22 +52,29 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 		time_info = localtime(&raw_time);
 
 		strftime(buffer, 100, "%Y-%m-%d %H:%M:%S.", time_info);
+		
+		interfaces_[interface] = "";
+		interfaces_[interface] += buffer;
 
-		interfaces_[interface] << buffer;
-		interfaces_[interface] << (ms.count() % 1000);
+		stringstream ss;
+		ss << (ms.count() % 1000);
+
+		interfaces_[interface] += ss.str();
 	}
 
 	SNMPValue *entity = packet->pdu().varbinds().binds().begin()->value();
-	interfaces_[interface] << ";";
+	interfaces_[interface] += ";";
 	switch (entity->type()) {
 		case SNMPDataType::Integer: {
 			SNMPInteger *integer = (SNMPInteger *) entity->value();
-			interfaces_[interface] << integer->value();
+			stringstream ss;
+			ss << integer->value();
+			interfaces_[interface] += ss.str();
 			break;
 		}
 		case SNMPDataType::OctetString: {
-			SNMPOctetString *octetString = (SNMPOctetString *) entity;
-			interfaces_[interface] << octetString->value();
+			SNMPOctetString *octetString = reinterpret_cast<SNMPOctetString *>(entity);
+			interfaces_[interface].insert(interfaces_[interface].length(), octetString->value().c_str(), octetString->length() - 2);
 			break;
 		}
 		case SNMPDataType::ObjectIdentifier: {
@@ -83,7 +90,7 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 			break;
 		}
 		case SNMPDataType::Null:
-			interfaces_[interface] << "0";
+			interfaces_[interface] += "0";
 			break;
 		default:
 			return Error::SNMPValueUnrecognized;
@@ -94,6 +101,6 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 
 void InterfaceInfoContainer::OutputResults() {
 	for (const auto &pair : interfaces_) {
-		cout << pair.second.str() << endl;
+		cout << pair.second << endl;
 	}
 }

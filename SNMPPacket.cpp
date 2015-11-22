@@ -16,8 +16,7 @@ SNMPInteger::SNMPInteger(long long value) {
 
 SNMPInteger::~SNMPInteger() {}
 
-Error SNMPInteger::Marshal(std::vector
-															 <Byte> &to) {
+Error SNMPInteger::Marshal(std::vector<Byte> &to) {
 	to.push_back(SNMPDataType::Integer);
 
 	// calculate last byte index that should be transfered
@@ -70,13 +69,12 @@ SNMPOctetString::SNMPOctetString(std::string value) {
 
 SNMPOctetString::~SNMPOctetString() {}
 
-Error SNMPOctetString::Marshal(std::vector
-																	 <Byte> &to) {
+Error SNMPOctetString::Marshal(std::vector<Byte> &to) {
 	to.push_back(type());
 	to.push_back(static_cast<Byte>(value_.length()));
 
 	for (auto it = value_.begin(); it != value_.end(); it++) {
-		to.push_back(static_cast<Byte>(*it));
+		to.push_back((char)(*it));
 	}
 
 	return Error::None;
@@ -86,14 +84,15 @@ Error SNMPOctetString::Unmarshal(std::list<Byte> &from) {
 	set_type(static_cast<SNMPDataType>(from.front()));
 	from.pop_front();
 
-	Byte length = from.front();
+	Byte len = from.front();
 	from.pop_front();
 
 	value_ = "";
-	for (int i = 0; i < length; i++) {
-		value_ += from.front();
+	for (int i = 0; i < len; i++) {
+		value_ += (char)(from.front());
 		from.pop_front();
 	}
+	value_ += '\0';
 
 	return Error::None;
 }
@@ -182,8 +181,7 @@ SNMPValue::~SNMPValue() {
 	}
 }
 
-Error SNMPValue::Marshal(std::vector
-														 <Byte> &to) {
+Error SNMPValue::Marshal(std::vector<Byte> &to) {
 	// TODO: SNMPValue marshalling should be able to
 	// marhsall all the stuff, but we dont need it now
 
