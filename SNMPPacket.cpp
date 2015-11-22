@@ -256,7 +256,13 @@ SNMPVarbind::SNMPVarbind(SNMPObjectIdentifier identifier, SNMPValue *value) {
 }
 
 SNMPVarbind::~SNMPVarbind() {
+}
 
+
+void SNMPVarbind::ClearValue() {
+	if (value_ != nullptr) {
+		delete value_;
+	}
 }
 
 Error SNMPVarbind::Marshal(std::vector
@@ -409,7 +415,7 @@ SNMPGetPacket::SNMPGetPacket(SNMPDataType type, SNMPInteger version, SNMPOctetSt
 }
 
 SNMPGetPacket::~SNMPGetPacket() {
-
+	pdu().varbinds().binds().begin()->ClearValue(); // clear the SNMPValue of packet destruction
 }
 
 Error SNMPGetPacket::Marshal(std::vector

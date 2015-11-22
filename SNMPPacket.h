@@ -151,6 +151,8 @@ public:
 		SNMPVarbind(SNMPObjectIdentifier identifier, SNMPValue *value);
 		virtual ~SNMPVarbind();
 
+		void ClearValue();
+
 		virtual Error Marshal(std::vector<Byte> &to) override;
 		virtual Error Unmarshal(std::list<Byte> &from) override;
 
