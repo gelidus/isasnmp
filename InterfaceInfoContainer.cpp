@@ -4,6 +4,7 @@
 
 #include <time.h>
 #include <chrono>
+#include <iomanip>
 #include "InterfaceInfoContainer.h"
 
 using namespace std;
@@ -17,6 +18,7 @@ InterfaceInfoContainer::~InterfaceInfoContainer() {
 
 void InterfaceInfoContainer::Reset() {
 	interfaces_.clear(); // clear the map
+	packet_count_.clear();
 }
 
 Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
@@ -56,8 +58,11 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 		time_info = localtime(&raw_time);
 
 		strftime(buffer, 100, "%Y-%m-%d %H:%M:%S.", time_info);
+		char millis[3];
+		sprintf(millis, "%03d", (int)(ms.count() % 1000));
+
 		std::stringstream ss;
-		ss << buffer << (ms.count() % 1000);
+		ss << buffer << millis;
 		time_mark_ = ss.str();
 	}
 
@@ -71,7 +76,20 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 		}
 		case SNMPDataType::OctetString: {
 			SNMPOctetString *octetString = reinterpret_cast<SNMPOctetString *>(entity->value());
-			interfaces_[interface] << octetString->value();
+			// no need to do something with empty string
+			if (octetString->value().length() <= 0) {
+				break;
+			}
+
+			// 6th value of object is MAC
+			if (packet_count_[interface] == 5) {
+				interfaces_[interface] << std::setfill('0') << std::setw(2) << hex << (int)(Byte)octetString->value()[0];
+				for (unsigned int i = 1; i < octetString->value().length(); i++) {
+					interfaces_[interface] << ":" << std::setfill('0') << std::setw(2) << hex << (int)(Byte)octetString->value()[i];
+				}
+			} else {
+				interfaces_[interface] << octetString->value();
+			}
 			break;
 		}
 		case SNMPDataType::ObjectIdentifier: {
@@ -92,6 +110,12 @@ Error InterfaceInfoContainer::ProcessPacket(SNMPGetPacket *packet) {
 		default:
 			return Error::SNMPValueUnrecognized;
 	}
+
+	// check for packet count progress
+	if (packet_count_.find(interface) == packet_count_.end()) {
+		packet_count_[interface] = 0;
+	}
+	packet_count_[interface]++;
 
 	return Error::None;
 }

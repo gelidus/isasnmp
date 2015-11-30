@@ -93,7 +93,6 @@ Error SNMPOctetString::Unmarshal(std::list<Byte> &from) {
 		value_ += (char)(from.front());
 		from.pop_front();
 	}
-	value_ += '\0';
 
 	return Error::None;
 }

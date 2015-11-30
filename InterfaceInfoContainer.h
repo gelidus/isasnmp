@@ -16,6 +16,10 @@ const int kSNMPEntryInterfaceIndex = 10;
 class InterfaceInfoContainer {
 private:
 		std::map<Byte, std::stringstream> interfaces_;
+
+		// Packet Count map stores the actual count of
+		// processed packet to store the progress
+		std::map<Byte, int> packet_count_;
 		std::string time_mark_;
 
 public:
